@@ -1,0 +1,132 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+  <div class="col-lg-10">
+    <h2>Users</h2>
+    <ol class="breadcrumb">
+      <li>
+        <a href="#">Home</a>
+      </li>
+      <li>
+        <a href="/users">Users</a>
+      </li>
+      <li class="active">
+        <strong>New</strong>
+      </li>
+    </ol>
+  </div>
+
+  <div class="col-lg-2">
+  </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+  <div class="ibox float-e-margins">
+    <div class="ibox-content">
+      <form role="form" class="form-horizontal" onsubmit="addUser(); return false;">
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label"><label for="daycare_name">Name</label></label>
+
+          <div class="col-sm-8"><input class="form-control" type="text" name="name" id="name"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label"><label for="daycare_name">Username</label></label>
+
+          <div class="col-sm-8"><input class="form-control" type="text" name="username" id="username"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label"><label for="daycare_name">Password</label></label>
+
+          <div class="col-sm-8"><input class="form-control" type="text" name="password" id="password"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label"><label for="daycare_name">Confirm Password</label></label>
+
+          <div class="col-sm-8"><input class="form-control" type="text" name="confirm_password" id="confirm_password">
+          </div>
+        </div>
+
+
+        <% if @user_role == USER_ROLE_SUPER_ADMIN %>
+            <div class="form-group">
+              <label class="col-sm-2 control-label"><label for="daycare_name">Day Care</label></label>
+
+              <div class="col-sm-8">
+                <select class="form-control" name="day_care" id="day_care">
+                  <option value="0">Select Day Care</option>
+                  <% @daycare.each do |d| %>
+                      <option value="<%= d.id %>"><%= d.name %></option>
+                  <% end %>
+                </select>
+              </div>
+            </div>
+        <% end %>
+
+        <% if @user_role == USER_ROLE_ADMIN %>
+            <div class="form-group">
+              <label class="col-sm-2 control-label"><label for="daycare_name">Day Care Center</label></label>
+
+              <div class="col-sm-8">
+                <select class="form-control" name="day_care_center" id="day_care_center">
+                  <option value="0">Select Day Care Center</option>
+                  <% @dayCareCenter.each do |d| %>
+                      <option value="<%= d.id %>"><%= d.name %></option>
+                  <% end %>
+                </select>
+              </div>
+            </div>
+        <% end %>
+
+        <div class="hr-line-dashed"></div>
+
+        <div class="form-group">
+          <div class="col-sm-4 col-sm-offset-2">
+            <button type="submit" name="submit" class="btn btn-primary">Add User</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+
+    function addUser() {
+        var hasError = 0;
+        var name = jQuery("#name").val();
+        var username = jQuery("#username").val();
+        var password = jQuery("#password").val();
+        var confirm_password = jQuery("#confirm_password").val();
+        var day_care = jQuery("#day_care").val();
+        var day_care_center = jQuery("#day_care_center").val();
+
+        $.ajax({
+            url: '/users/save',
+            type: 'POST',
+            data: {
+                authenticity_token: '<%= form_authenticity_token %>',
+                id: $('#id').val() ? $('#id').val() : 0,
+                name: name,
+                username: username,
+                password: password,
+                confirm_password: confirm_password,
+                day_care_id: day_care,
+                day_care_center_id: day_care_center
+            },
+            success: function (data) {
+                if (data.status == 'error') {
+                    alert(data.message);
+
+                } else if (data.status == 'success') {
+                    location.replace('/users');
+
+                } else {
+                    alert('error');
+                }
+            }
+        });
+    }
+
+</script>

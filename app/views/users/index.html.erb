@@ -1,0 +1,194 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+  <div class="col-xs-10">
+    <h2>Admin</h2>
+    <ol class="breadcrumb">
+      <li>
+        <a href="index.html">Home</a>
+      </li>
+      <li class="active">
+        <strong>Admins</strong>
+      </li>
+    </ol>
+  </div>
+
+  <div class="col-xs-2">
+    <a href="javascript:void(0)" onclick="showAddUserForm()" style="    float: right;
+            font-size: 38px;
+            margin: 16px 10px 0 0;
+            color: #1ab394;"><i class="fa fa-plus-circle"></i></a>
+  </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+
+  <div class="ibox float-e-margins">
+    <div class="ibox-content">
+      <% if !flash[:notice].blank? %>
+          <div class="alert alert-success"><%= flash[:notice] %></div>
+      <% end %>
+
+
+      <table class="table table-striped">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Username</th>
+          <th>Day Care</th>
+          <th class="text-center">Actions</th>
+        </tr>
+        </thead>
+        <tbody id="userDataDiv">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+
+<%= render partial: 'form' %>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        populateHtml();
+    });
+
+    var users = new Array();
+    <% @users.each do |user| %>
+        users[<%=user.id%>] = {
+            id: "<%=raw user.id %>",
+            name: "<%=raw json_string user.name %>",
+            email: "<%=raw json_string user.email %>",
+            username: "<%=raw json_string user.username %>",
+            day_care_id: "<%=raw user.user_role.day_care_id %>",
+            day_care_name: "<%=raw json_string user.user_role.day_care.present? ? user.user_role.day_care.name : '' %>"
+        };
+    <% end %>
+
+    function populateHtml(){
+        var str = ""
+        for(i in users){
+            var user = users[i];
+            str += '<tr class="tblrow-'+ user.id +'">'+
+                    '<td id="user_name-'+ user.id +'">'+ user.name +'</td>'+
+                    '<td>'+ user.email +'</td>'+
+                    '<td>'+ user.username +'</td>'+
+                    '<td>'+ user.day_care_name +'</td>'+
+                    '<td class="text-center">'+
+                    '<a href="javascript:void(0)" onclick="showEditUserForm('+ i +')"><i class="fa fa-pencil-square-o text-navy"></i></a> &nbsp; '+
+                    "<a href=\"javascript:void(0)\" onclick=\"deleteUserConfirm("+ user.id +")\"><i class=\"fa fa-trash-o text-navy\"></i></a>"+
+                    '</td>'+
+                    '</tr>';
+        }
+        $("#userDataDiv").html(str);
+    };
+
+    function showAddUserForm(){
+        resetUserForm();
+
+        $("#username").prop("readonly", false);
+        $("#passwordFieldWrap").css("display","block");
+        $("#userForm .submitButton, #userForm .modal-title").text("Add Admin");
+        $('#userForm').modal('show');
+    };
+
+    function showEditUserForm(id){
+        resetUserForm();
+
+        var user = users[id];
+        $("#user_id").val(user.id);
+        $("#name").val(user.name);
+        $("#email").val(user.email);
+        $("#username").val(user.username).prop("readonly", true);
+        $("#day_care").val(user.day_care_id);
+        $("#passwordFieldWrap").css("display","none");
+
+        $("#userForm .submitButton, #userForm .modal-title").text("Update Admin");
+        $('#userForm').modal('show');
+    };
+
+    var day_care_name = jQuery("#day_care").text();
+    function saveUser() {
+        $("#userFormSubmitBtn").addClass("btnLoaderWrapActive");
+        var name = jQuery("#name").val();
+        var email = jQuery("#email").val();
+        var username = jQuery("#username").val();
+        var password = jQuery("#password").val();
+        var confirm_password = jQuery("#confirm_password").val();
+        var day_care = jQuery("#day_care").val();
+        day_care_name = jQuery("#day_care option:selected").text();
+
+        $.ajax({
+            url: '/users/save',
+            type: 'POST',
+            data: {
+                authenticity_token: '<%= form_authenticity_token %>',
+                id: $('#user_id').val() ? $('#user_id').val() : 0,
+                name: name,
+                email: email,
+                username: username,
+                password: password,
+                confirm_password: confirm_password,
+                day_care_id: day_care
+            },
+            success: function (data) {
+                $("#userFormSubmitBtn").removeClass("btnLoaderWrapActive");
+                if(isErrorResponce(data)){
+                    showFormError('formErrorDiv', getErrorMessage(data));
+                    return;
+                }
+
+                $('#userForm').modal('hide');
+
+                //updateData(data.contents);
+                showTosterMsg('success', 'Data saved successfully');
+                location.reload();
+            }
+        });
+    };
+
+    function updateData(user){
+        if(users[user.id] == null ){
+            var newObj = { id: user.id, name: user.name, username: user.username, day_care_id: user.user_role.day_care_id, day_care_name: day_care_name};
+            users.push(newObj);
+
+        }else {
+            users[user.id].name = user.name;
+            users[user.id].day_care_id = user.user_role.day_care_id;
+            users[user.id].day_care_name = day_care_name;
+        }
+
+        populateHtml();
+        day_care_name = '';
+    };
+
+    function deleteUserConfirm(id, name) {
+        var r = confirm("Do you want to delete " + $("#user_name-"+id).text());
+        if (r == true) {
+            $.ajax({
+                url: '/users/delete/' + id,
+                type: 'GET',
+                success: function (data) {
+                   if(isErrorResponce(data)){
+                        showFormError('formErrorDiv', getErrorMessage(data));
+                        return;
+                    }
+
+                    //$(".tblrow-" + id).remove();
+                    showTosterMsg('success', name+' removed successfully');
+                    location.reload();
+                }
+            });
+        }
+    };
+
+    function resetUserForm(){
+        $("#user_id").val('');
+        $("#name").val('');
+        $("#username").val('');
+        $("#password").val('');
+        $("#confirm_password").val('');
+        $("#day_care").val('');
+    };
+</script>

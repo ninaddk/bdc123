@@ -1,0 +1,375 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+  <div class="col-xs-10">
+    <h2>Children</h2>
+    <ol class="breadcrumb">
+      <li>
+        <a href="index.html">Home</a>
+      </li>
+      <li class="active">
+        <strong>children</strong>
+      </li>
+    </ol>
+  </div>
+
+  <div class="col-xs-2">
+    <a href="javascript:void(0);" onclick="showAddStudentForm()" style="    float: right;
+            font-size: 38px;
+            margin: 16px 10px 0 0;
+            color: #1ab394;"><i class="fa fa-plus-circle"></i></a>
+  </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+
+  <div class="ibox float-e-margins">
+    <div class="ibox-content">
+      <% if !flash[:notice].blank? %>
+          <div class="alert alert-success"><%= flash[:notice] %></div>
+      <% end %>
+
+
+      <table class="table table-striped">
+        <thead>
+        <tr>
+          <th>Image</th>
+          <th>Name</th>
+          <th>Classroom</th>
+          <th>DOB</th>
+          <th>Pick up Time</th>
+          <th>Contact Number</th>
+          <th>Parents</th>
+          <th class="text-center">Actions</th>
+        </tr>
+        </thead>
+        <tbody id="studentDataDiv">
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<%= render partial: 'form' %>
+
+
+<script type="text/javascript">
+    $( document ).ready(function() {
+        $('#dob').datepicker({
+            autoclose: true,
+            format: "dd/mm/yyyy",
+            endDate: new Date()
+        });
+
+        populateHtml();
+        <% if params[:upload_image].present?%>
+            showUploadImageForm(<%= params[:upload_image_id] %>);
+        <% end %>
+    });
+
+    var students = new Array();
+    <% @students.each do |student| %>
+        students[<%=student.id%>] = {
+            id: "<%=raw student.id %>",
+            image: "<%=raw student.thumb_image %>",
+            name: "<%=raw json_string student.name %>",
+            day_care_center: "<%=raw student.day_care_center_id %>",
+            classroom_type: "<%=raw student.classroom_type %>",
+            classroom_type_name: "<%=raw ENM_CLASSROOM_TYPE.get_name_by_id(student.classroom_type) %>",
+            dob: "<%=raw (student.dob ? student.dob : '') %>",
+            pick_up_time: "<%=raw (student.pick_up_time ? student.pick_up_time.strftime('%H:%M') : '') %>",
+            enroll_date: "<%=raw student.enroll_date %>",
+            activation_date: "<%=raw student.activation_date %>",
+            deactivation_date: "<%=raw student.deactivation_date %>",
+            primary_contact_number: "<%=raw json_string student.primary_contact_number %>",
+            preferred_contact_number: "<%=raw json_string student.preferred_contact_number %>",
+            food_preference: "<%=raw json_string student.food_preference %>",
+            ethnicity: "<%=raw json_string student.ethnicity %>",
+            allergies: "<%=raw json_string student.allergies %>",
+            medical_conditions: "<%=raw json_string student.medical_conditions %>",
+            parents: [
+                <% student.parents_with_relations.each do |parent| %>
+                    {
+                        id: "<%=raw parent[:id] %>",
+                        name: "<%=raw json_string parent[:name] %>",
+                        rel: "<%=raw json_string parent[:rel] %>"
+                    },
+                <% end %>
+            ]
+        };
+    <% end %>
+
+    function populateHtml(){
+        var str = ""
+        for(i in students){
+            var student = students[i];
+            var parents_str = "";
+            for(n in student.parents){
+                var parent = student.parents[n];
+                parents_str = parents_str+'- '+parent.name+'<br/>';
+            }
+
+            str += '<tr class="tblrow-'+ student.id +'">'+
+                    '<td> <img src="'+ student.image +'" width="50" style="display:block; margin-bottom:5px;"/><a href="javascript:void(0)" onclick="showUploadImageForm('+ student.id  +')">Upload<a> </td>'+
+                    '<td id="student_name-'+ student.id +'">'+ student.name +'</td>'+
+                    '<td>'+ student.classroom_type_name +'</td>'+
+                    '<td>'+ getDateFormat(student.dob) +'</td>'+
+                    '<td>'+ student.pick_up_time +'</td>'+
+                    '<td>Primary :- '+ student.primary_contact_number +' <br> Preferred :- '+ student.preferred_contact_number +'</td>'+
+                    '<td>'+parents_str+'</td>'+
+                    '<td class="text-center">'+
+                        '<a href="javascript:void(0)" title="Add Parent" onclick="showParentsForm('+ i +')"><i class="fa fa-user text-navy"></i></a> &nbsp; '+
+                        '<a href="javascript:void(0)" onclick="showEditStudentForm('+ i +')"><i class="fa fa-pencil-square-o text-navy"></i></a> &nbsp; '+
+                        "<a href=\"javascript:void(0)\" onclick=\"deleteStudentConfirm("+ student.id +")\"><i class=\"fa fa-trash-o text-navy\"></i></a>"+
+                    '</td>'+
+                    '</tr>';
+        }
+        $("#studentDataDiv").html(str);
+    };
+
+    function showAddStudentForm(){
+        resetStudentForm();
+        $("#studentForm .submitButton, #studentForm .modal-title").text("Add Child");
+        $('#studentForm').modal('show');
+    };
+
+    function showEditStudentForm(id){
+        resetStudentForm();
+
+        var student = students[id];
+        $("#student_id").val(student.id);
+        $("#name").val(student.name);
+        $("#day_care_center").val(student.day_care_center);
+        $("#classroom_type").val(student.classroom_type);
+        $("#dob").val(getDateFormatDDMMYY(student.dob));
+        $("#pick_up_time").val(student.pick_up_time);
+        $("#primary_contact_number").val(student.primary_contact_number);
+        $("#preferred_contact_number").val(student.preferred_contact_number);
+        $("#food_preference").val(student.food_preference);
+        $("#ethnicity").val(student.ethnicity);
+        $("#allergies").val(student.allergies);
+        $("#medical_conditions").val(student.medical_conditions);
+
+        $("#studentForm .submitButton, #studentForm .modal-title").text("Update Child");
+        $('#studentForm').modal('show');
+    };
+
+    function saveStudent() {
+        $("#studentFormSubmitBtn").addClass("btnLoaderWrapActive");
+        var name = $("#name").val();
+        var day_care_center = $("#day_care_center").val();
+        var classroom_type = $("#classroom_type").val();
+        var dob = $("#dob").val();
+        var pick_up_time = $("#pick_up_time").val();
+        var primary_contact_number = $("#primary_contact_number").val();
+        var preferred_contact_number = $("#preferred_contact_number").val();
+        var food_preference = $("#food_preference").val();
+        var ethnicity = $("#ethnicity").val();
+        var allergies = $("#allergies").val();
+        var medical_conditions = $("#medical_conditions").val();
+
+        $.ajax({
+            url: '/students/save',
+            type: 'POST',
+            data: {
+                authenticity_token: '<%= form_authenticity_token %>',
+                id: $('#student_id').val() ? $('#student_id').val() : 0,
+                name: name,
+                day_care_center: day_care_center,
+                classroom_type: classroom_type,
+                dob: dob,
+                pick_up_time: pick_up_time,
+                primary_contact_number: primary_contact_number,
+                preferred_contact_number: preferred_contact_number,
+                food_preference: food_preference,
+                ethnicity: ethnicity,
+                allergies: allergies,
+                medical_conditions: medical_conditions
+            },
+            success: function (data) {
+                $("#studentFormSubmitBtn").removeClass("btnLoaderWrapActive");
+                if(isErrorResponce(data)){
+                    showFormError('formErrorDiv', getErrorMessage(data));
+                    return;
+                }
+
+                $('#studentForm').modal('hide');
+
+                //updateData(data.contents);
+                showTosterMsg('success', 'Data saved successfully');
+                location.reload();
+            }
+        });
+    };
+
+    function updateData(student){
+        if(students[student.id] == null ){
+            var newObj = {
+                id: student.id,
+                name: student.name,
+                classroom_type: student.classroom_type,
+                dob: student.dob,
+                enroll_date: student.enroll_date,
+                activation_date: student.activation_date,
+                deactivation_date: student.deactivation_date,
+                primary_contact_number: student.primary_contact_number,
+                preferred_contact_number: student.preferred_contact_number,
+                food_preference: student.food_preference,
+                ethnicity: student.ethnicity,
+                allergies: student.allergies,
+                medical_conditions: student.medical_conditions
+            };
+            students.push(newObj);
+
+        }else {
+            students[student.id].name = student.name;
+            students[student.id].classroom_type = student.classroom_type;
+            students[student.id].dob = student.dob;
+            students[student.id].enroll_date =student.enroll_date;
+            students[student.id].activation_date = student.activation_date;
+            students[student.id].deactivation_date = student.deactivation_date;
+            students[student.id].primary_contact_number = student.primary_contact_number;
+            students[student.id].preferred_contact_number = student.preferred_contact_number;
+            students[student.id].food_preference = student.food_preference;
+            students[student.id].ethnicity = student.ethnicity;
+            students[student.id].allergies = student.allergies;
+            students[student.id].medical_conditions = student.medical_conditions;
+        }
+
+        populateHtml();
+    };
+
+    function deleteStudentConfirm(id) {
+        var r = confirm("Do you want to delete " + $("#student_name-"+id).text());
+        if (r == true) {
+            $.ajax({
+                url: '/students/delete/' + id,
+                type: 'GET',
+                success: function (data) {
+                    if(isErrorResponce(data)){
+                        showFormError('formErrorDiv', getErrorMessage(data));
+                        return;
+                    }
+
+                    //$(".tblrow-" + id).remove();
+                    showTosterMsg('success', name+' removed successfully');
+                    location.reload();
+                }
+            });
+        }
+    };
+
+    function resetStudentForm(){
+        $("#student_id").val('');
+        $("#name").val('');
+        $("#dob").val('');
+        $("#primary_contact_number").val('');
+        $("#preferred_contact_number").val('');
+        $("#food_preference").val('');
+        $("#ethnicity").val('');
+        $("#allergies").val('');
+        $("#medical_conditions").val('');
+    };
+
+    function showUploadImageForm(id){
+        $("#image_student_id").val(id);
+        $('#uploadStudentImageForm').modal('show');
+    };
+
+    var parents_arr = [];
+    <% @parents.each do |p| %>
+        parents_arr[<%= p.id %>] = "<%= json_string p.name %>";
+    <% end %>
+
+    function getParentSelectField(selected_id){
+        var str = "";
+        for(i in parents_arr){
+            var selected = "";
+            if(selected_id == i ){ selected = "selected" }
+            str = str + '<option value="'+i+'" '+selected+'>'+ parents_arr[i] +'</option>';
+        }
+        return '<select class="form-control"><option value="">Select parent</option>'+ str +'</select>';
+    };
+
+    function showParentsForm(key){
+        var student = students[key];
+        $("#student_id").val(student.id);
+
+        var parent_str = "";
+        for(i in student.parents){
+            var parent = student.parents[i];
+            var parent_str = parent_str+'<div class="row relatedParents">' +
+                    '<div class="col-xs-6 form-group">' +
+                    getParentSelectField(parent.id) +
+                    '</div>' +
+                    '<div class="col-xs-5 form-group">' +
+                    '<input class="form-control" type="text" value="'+ parent.rel +'">' +
+                    '<a href="javascript:void(0)" class="removeRow" onclick="removeParentRow(this)"><i class="fa fa-close"></i></a>' +
+                    '</div>' +
+                    '</div>';
+
+        }
+        $("#related_parents").html(parent_str);
+
+        $('#assignedParentForm').modal('show');
+    };
+
+    function addParentRow(){
+        var str = '<div class="row relatedParents">' +
+                '<div class="col-xs-6 form-group">' +
+                getParentSelectField(-1) +
+                '</div>' +
+                '<div class="col-xs-5 form-group">' +
+                '<input class="form-control" type="text">' +
+                '<a href="javascript:void(0)" class="removeRow" onclick="removeParentRow(this)"><i class="fa fa-close"></i></a>' +
+                '</div>' +
+                '</div>';
+        $("#related_parents").append(str);
+    };
+
+    function removeParentRow(thisEle){
+        $(thisEle).parent(".form-group").parent(".row").remove();
+    }
+
+    function saveRelatedParents() {
+        var related_parents = {};
+        $(".relatedParents").each(function () {
+            if ($(this).find('select').val()) {
+                related_parents[$(this).find('select').val()] = $(this).find('input').val();
+            }
+        });
+
+        console.log(related_parents);
+
+        $.ajax({
+            url: '/students/parent_relation',
+            type: 'POST',
+            data: {
+                authenticity_token: '<%= form_authenticity_token %>',
+                student_id: $("#student_id").val(),
+                related_parents: related_parents
+            },
+            success: function (data) {
+                if (isErrorResponce(data)) {
+                    showFormError('parentFormErrorDiv', getErrorMessage(data));
+                    return;
+                }
+
+                $('#assignedParentForm').modal('hide');
+
+                //updateData(data.contents);
+                showTosterMsg('success', 'Data saved successfully');
+                location.reload();
+            }
+        });
+    }
+</script>
+
+<style>
+    .removeRow {
+        position: absolute;
+        right: -10px;
+        top: 5px;
+    }
+    #related_students .row:first-child .removeRow { display: none; }
+</style>

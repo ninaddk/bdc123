@@ -1,0 +1,204 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+  <div class="col-xs-10">
+    <h2>Notification</h2>
+    <ol class="breadcrumb">
+      <li>
+        <a href="index.html">Home</a>
+      </li>
+      <li class="active">
+        <strong>Notifications</strong>
+      </li>
+    </ol>
+  </div>
+
+  <div class="col-xs-2">
+    <a href="javascript:void(0);" onclick="showAddnotificationForm()" style="    float: right;
+            font-size: 38px;
+            margin: 16px 10px 0 0;
+            color: #1ab394;"><i class="fa fa-plus-circle"></i></a>
+  </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+
+  <div class="ibox float-e-margins">
+    <div class="ibox-content">
+      <% if !flash[:notice].blank? %>
+          <div class="alert alert-success"><%= flash[:notice] %></div>
+      <% end %>
+
+
+      <table class="table table-striped">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Day Care Branch</th>
+          <th>Due Date</th>
+          <th>Reminder Date</th>
+          <th class="text-center">Actions</th>
+        </tr>
+        </thead>
+        <tbody id="notificationDataDiv">
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<%= render partial: 'form' %>
+
+<script type="text/javascript">
+    $( document ).ready(function() {
+
+        $('#due_date, #reminder_date').datepicker({
+            autoclose: true,
+            format: "dd/mm/yyyy",
+            startDate: new Date()
+        });
+
+        populateHtml();
+    });
+
+    var notifications = new Array();
+    <%
+        num = 0
+        @notifications.each do |notification|
+       %>
+        notifications[<%=num%>] = {
+            id: "<%=raw notification.id %>",
+            name: "<%=raw json_string notification.name %>",
+            day_care_center: "<%=raw notification.day_care_center_id %>",
+            day_care_center_name: "<%=raw json_string notification.day_care_center.present? ? notification.day_care_center.name : '' %>",
+            due_date: "<%=raw get_date_time_format notification.due_date %>",
+            reminder_date: "<%=raw get_date_time_format notification.reminder_date %>"
+        };
+    <%
+        num = num+1
+        end
+    %>
+
+    function populateHtml(){
+        var str = ""
+        for(i in notifications){
+            var notification = notifications[i];
+            str += '<tr class="tblrow-'+ notification.id +'">'+
+                    '<td id="notification_name-'+ notification.id +'">'+ notification.name +'</td>'+
+                    '<td>'+ notification.day_care_center_name +'</td>'+
+                    '<td>'+ notification.due_date +'</td>'+
+                    '<td>'+ notification.reminder_date +'</td>'+
+                    '<td class="text-center">'+
+                        '<a href="javascript:void(0)" onclick="showEditnotificationForm('+ i +')"><i class="fa fa-pencil-square-o text-navy"></i></a> &nbsp; '+
+                        "<a href=\"javascript:void(0)\" onclick=\"deletenotificationConfirm("+ notification.id +")\"><i class=\"fa fa-trash-o text-navy\"></i></a>"+
+                    '</td>'+
+                    '</tr>';
+        }
+        $("#notificationDataDiv").html(str);
+    };
+
+    function showAddnotificationForm(){
+        resetnotificationForm();
+        $("#notificationForm .submitButton, #notificationForm .modal-title").text("Add notification");
+        $('#notificationForm').modal('show');
+    };
+
+    function showEditnotificationForm(id){
+        resetnotificationForm();
+
+        var notification = notifications[id];
+        $("#notification_id").val(notification.id);
+        $("#name").val(notification.name);
+        $("#day_care_center").val(notification.day_care_center);
+        $("#due_date").val(getDateFormatDDMMYY(notification.due_date));
+        $("#due_date_time").val(getTimeFormat(notification.due_date));
+        $("#reminder_date").val(getDateFormatDDMMYY(notification.reminder_date));
+        $("#reminder_date_time").val(getTimeFormat(notification.reminder_date));
+
+        $("#notificationForm .submitButton, #notificationForm .modal-title").text("Update Notification");
+        $('#notificationForm').modal('show');
+    };
+
+    function savenotification() {
+        $("#notificationFormSubmitBtn").addClass("btnLoaderWrapActive");
+        var name = $("#name").val();
+        var day_care_center = $("#day_care_center").val();
+        var due_date = $("#due_date").val();
+        var due_date_time = $("#due_date_time").val();
+        var reminder_date = $("#reminder_date").val();
+        var reminder_date_time = $("#reminder_date_time").val();
+
+        $.ajax({
+            url: '/notifications/save',
+            type: 'POST',
+            data: {
+                authenticity_token: '<%= form_authenticity_token %>',
+                id: $('#notification_id').val() ? $('#notification_id').val() : 0,
+                name: name,
+                day_care_center: day_care_center,
+                due_date: due_date+' '+due_date_time,
+                reminder_date: reminder_date+' '+reminder_date_time
+            },
+            success: function (data) {
+                $("#notificationFormSubmitBtn").removeClass("btnLoaderWrapActive");
+                if(isErrorResponce(data)){
+                    showFormError('formErrorDiv', getErrorMessage(data));
+                    return;
+                }
+
+                $('#notificationForm').modal('hide');
+
+                //updateData(data.contents);
+                showTosterMsg('success', 'Data saved successfully');
+                location.reload();
+            }
+        });
+    };
+
+    function updateData(notification){
+        console.log(notification);
+        if(notifications[notification.id] == null ){
+            var newObj = {
+                id: notification.id,
+                name: notification.name,
+                due_date: notification.due_date,
+                reminder_date: notification.reminder_date == null? '' : notification.reminder_date
+            };
+            notifications.push(newObj);
+
+        }else {
+            notifications[notification.id].name = notification.name;
+            notifications[notification.id].due_date = notification.due_date;
+            notifications[notification.id].reminder_date = notification.reminder_date;
+        }
+
+        populateHtml();
+    };
+
+    function deletenotificationConfirm(id, name) {
+        var r = confirm("Do you want to delete " + $("#notification_name-"+id).text());
+        if (r == true) {
+            $.ajax({
+                url: '/notifications/delete/' + id,
+                type: 'GET',
+                success: function (data) {
+                    if(isErrorResponce(data)){
+                        showFormError('formErrorDiv', getErrorMessage(data));
+                        return;
+                    }
+
+                    //$(".tblrow-" + id).remove();
+                    showTosterMsg('success', name+' removed successfully');
+                    location.reload();
+                }
+            });
+        }
+    };
+
+    function resetnotificationForm(){
+        $("#notification_id").val('');
+        $("#name").val('');
+        $("#due_date").val('');
+        $("#reminder_date").val('');
+    };
+</script>

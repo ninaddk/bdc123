@@ -1,0 +1,198 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+  <div class="col-xs-10">
+    <h2>Teacher</h2>
+    <ol class="breadcrumb">
+      <li>
+        <a href="index.html">Home</a>
+      </li>
+      <li class="active">
+        <strong>Teachers</strong>
+      </li>
+    </ol>
+  </div>
+
+  <div class="col-xs-2">
+    <a href="javascript:void(0)" onclick="showAddTeacherForm()" style="    float: right;
+            font-size: 38px;
+            margin: 16px 10px 0 0;
+            color: #1ab394;"><i class="fa fa-plus-circle"></i></a>
+  </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+
+  <div class="ibox float-e-margins">
+    <div class="ibox-content">
+      <% if !flash[:notice].blank? %>
+          <div class="alert alert-success"><%= flash[:notice] %></div>
+      <% end %>
+
+
+      <table class="table table-striped">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Username</th>
+          <th>Day Care Branch</th>
+          <th>Classroom</th>
+          <th class="text-center">Actions</th>
+        </tr>
+        </thead>
+        <tbody id="teacherDataDiv">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+
+
+<%= render partial: 'form' %>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        populateHtml();
+    });
+
+    var teachers = new Array();
+    <% @teachers.each do |teacher| %>
+        teachers[<%=teacher.id%>] = {
+            id: "<%=raw teacher.id %>",
+            name: "<%=raw json_string teacher.name %>",
+            email: "<%=raw json_string teacher.email %>",
+            day_care_center: "<%=raw teacher.user_role.day_care_center_id %>",
+            day_care_center_name: "<%=raw json_string teacher.user_role.day_care_center.present? ? teacher.user_role.day_care_center.name : ''%>",
+            classroom_type: "<%=raw teacher.user_role.classroom_type %>",
+            classroom_type_name: "<%=raw ENM_CLASSROOM_TYPE.get_name_by_id(teacher.user_role.classroom_type) %>",
+            username: "<%=raw json_string teacher.username %>"
+        };
+    <% end %>
+
+    function populateHtml(){
+        var str = ""
+        for(i in teachers){
+            var teacher = teachers[i];
+            str += '<tr class="tblrow-'+ teacher.id +'">'+
+                    '<td id="teacher_name-'+ teacher.id +'">'+ teacher.name +'</td>'+
+                    '<td>'+ teacher.email +'</td>'+
+                    '<td>'+ teacher.username +'</td>'+
+                    '<td>'+ teacher.day_care_center_name +'</td>'+
+                    '<td>'+ teacher.classroom_type_name +'</td>'+
+                    '<td class="text-center">'+
+                    '<a href="javascript:void(0)" onclick="showEditTeacherForm('+ i +')"><i class="fa fa-pencil-square-o text-navy"></i></a> &nbsp; '+
+                    "<a href=\"javascript:void(0)\" onclick=\"deleteTeacherConfirm("+ teacher.id +")\"><i class=\"fa fa-trash-o text-navy\"></i></a>"+
+                    '</td>'+
+                    '</tr>';
+        }
+        $("#teacherDataDiv").html(str);
+    };
+
+    function showAddTeacherForm(){
+        resetTeacherForm();
+
+        $("#username").prop("readonly", false);
+        $("#passwordFieldWrap").css("display","block");
+        $("#teacherForm .submitButton, #teacherForm .modal-title").text("Add Teacher");
+        $('#teacherForm').modal('show');
+    };
+
+    function showEditTeacherForm(id){
+        resetTeacherForm();
+
+        var teacher = teachers[id];
+        $("#teacher_id").val(teacher.id);
+        $("#name").val(teacher.name);
+        $("#email").val(teacher.email);
+        $("#classroom_type").val(teacher.classroom_type);
+        $("#day_care_center").val(teacher.day_care_center);
+        $("#username").val(teacher.username).prop("readonly", true);
+        $("#passwordFieldWrap").css("display","none");
+
+        $("#teacherForm .submitButton, #teacherForm .modal-title").text("Update Teacher");
+        $('#teacherForm').modal('show');
+    };
+
+    function saveTeacher() {
+        $("#teacherFormSubmitBtn").addClass("btnLoaderWrapActive");
+        var name = jQuery("#name").val();
+        var email = jQuery("#email").val();
+        var classroom_type = jQuery("#classroom_type").val();
+        var day_care_center = jQuery("#day_care_center").val();
+        var username = jQuery("#username").val();
+        var password = jQuery("#password").val();
+        var confirm_password = jQuery("#confirm_password").val();
+
+        $.ajax({
+            url: '/teachers/save',
+            type: 'POST',
+            data: {
+                authenticity_token: '<%= form_authenticity_token %>',
+                id: $('#teacher_id').val() ? $('#teacher_id').val() : 0,
+                name: name,
+                email: email,
+                classroom_type: classroom_type,
+                day_care_center: day_care_center,
+                username: username,
+                password: password,
+                confirm_password: confirm_password
+            },
+            success: function (data) {
+                $("#teacherFormSubmitBtn").removeClass("btnLoaderWrapActive");
+                if(isErrorResponce(data)){
+                    showFormError('formErrorDiv', getErrorMessage(data));
+                    return;
+                }
+
+                $('#teacherForm').modal('hide');
+
+                //updateData(data.contents);
+                showTosterMsg('success', 'Data saved successfully');
+                location.reload();
+            }
+        });
+    };
+
+    function updateData(teacher){
+        if(teachers[teacher.id] == null ){
+            var newObj = { id: teacher.id, name: teacher.name, username: teacher.username};
+            teachers.push(newObj);
+
+        }else {
+            teachers[teacher.id].name = teacher.name;
+            teachers[teacher.id].classroom_type = teacher.classroom_type;
+        }
+
+        populateHtml();
+    };
+
+    function deleteTeacherConfirm(id) {
+        var r = confirm("Do you want to delete " + $("#teacher_name-"+id).text());
+        if (r == true) {
+            $.ajax({
+                url: '/teachers/delete/' + id,
+                type: 'GET',
+                success: function (data) {
+                    if(isErrorResponce(data)){
+                        showFormError('formErrorDiv', getErrorMessage(data));
+                        return;
+                    }
+
+                    //$(".tblrow-" + id).remove();
+                    showTosterMsg('success', name+' removed successfully');
+                    location.reload();
+                }
+            });
+        }
+    };
+
+    function resetTeacherForm(){
+        $("#teacher_id").val('');
+        $("#name").val('');
+        $("#classroom_type").val('');
+        $("#username").val('');
+        $("#password").val('');
+        $("#confirm_password").val('');
+    };
+</script>

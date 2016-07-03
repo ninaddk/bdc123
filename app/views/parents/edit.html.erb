@@ -1,0 +1,108 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+  <div class="col-lg-10">
+    <h2>Parents</h2>
+    <ol class="breadcrumb">
+      <li>
+        <a href="#">Home</a>
+      </li>
+      <li>
+        <a href="/parents">Parents</a>
+      </li>
+      <li class="active">
+        <strong>Edit</strong>
+      </li>
+    </ol>
+  </div>
+
+  <div class="col-lg-2">
+  </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+  <div class="ibox float-e-margins">
+    <div class="ibox-content">
+      <form role="form" class="form-horizontal" onsubmit="updateParent(); return false;">
+        <input type="hidden" name="id" id="id" value="<%= @parent.id %>">
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label"><label for="name">Name</label></label>
+          <div class="col-sm-8"><input class="form-control" type="text" name="name" id="name" value="<%= @parent.name %>"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label"><label for="username">Username</label></label>
+          <div class="col-sm-8"><input class="form-control" type="text" name="username" id="username" readonly value="<%= @parent.username %>"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label"><label for="email">Email</label></label>
+          <div class="col-sm-8"><input class="form-control" type="text" name="email" id="email" value="<%= @parent.email %>">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label"><label for="contact_number">Contact Number</label></label>
+          <div class="col-sm-8"><input class="form-control" type="text" name="contact_number" id="contact_number" value="<%= @parent.contact_number %>">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label"><label for="address">Address</label></label>
+          <div class="col-sm-8"><input class="form-control" type="text" name="address" id="address" value="<%= @parent.address %>">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label"><label for="zipcode">Zip Code</label></label>
+          <div class="col-sm-8"><input class="form-control" type="text" name="zipcode" id="zipcode" value="<%= @parent.zipcode %>">
+          </div>
+        </div>
+
+        <div class="hr-line-dashed"></div>
+
+        <div class="form-group">
+          <div class="col-sm-4 col-sm-offset-2">
+            <button type="submit" name="submit" class="btn btn-primary">Update Parent</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+    function updateParent() {
+        var hasError = 0;
+        var name = jQuery("#name").val();
+        var email = jQuery("#email").val();
+        var contact_number = jQuery("#contact_number").val();
+        var address = jQuery("#address").val();
+        var zipcode = jQuery("#zipcode").val();
+
+        $.ajax({
+            url: '/parents/save',
+            type: 'POST',
+            data: {
+                authenticity_token: '<%= form_authenticity_token %>',
+                id: $('#id').val() ? $('#id').val() : 0,
+                name: name,
+                email: email,
+                contact_number: contact_number,
+                address: address,
+                zipcode: zipcode
+            },
+            success: function (data) {
+                if (data.status == 'error') {
+                    alert(data.message);
+
+                } else if (data.status == 'success') {
+                    location.replace('/parents');
+
+                } else {
+                    alert('error');
+                }
+            }
+        });
+    }
+
+</script>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+</head>
+<body>
+<h3>Hello <%= @user.name %>,</h3>
+<p>You have successfully register with bloom as <strong><%= @user_role %></strong>.</p>
+<p>
+To log on to the site, use the following credentials:<br/>
+  Username: <%= @user.username %><br>
+  Password: <%= @password %><br>
+</p>
+
+<% if @day_care.present? %>
+    <p>Your Day Care name is <strong><%= @day_care %></strong></p>
+<% end %>
+
+<% if @day_care_center.present? %>
+    <p>Your Day Care branch name is <strong><%= @day_care_center %></strong></p>
+<% end %>
+
+<p>Thanks for joining and have a great day!</p>
+
+</body>
+</html>

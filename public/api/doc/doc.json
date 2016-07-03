@@ -1,0 +1,630 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": " ",
+    "version": "1.0.0",
+    "title": ""
+  },
+  "host": "",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "teacher",
+      "description": "Teacher : Login"
+    },
+    {
+      "name": "student",
+      "description": "Student : Edit Profile, Get Profile"
+    },
+    {
+      "name": "parent",
+      "description": "Parent : Login, Edit Profile, Get Profile"
+    },
+    {
+      "name": "activity",
+      "description": "Activity : List, Save"
+    },
+    {
+      "name": "notification",
+      "description": "Notification : List"
+    }
+  ],
+  "schemes": ["https"],
+  "paths": {
+    "/teachers/login": {
+      "post": {
+        "tags": ["teacher"],
+        "summary": "Teacher Login",
+        "description": "",
+        "operationId": "teacherLogin",
+        "consumes": ["application/x-www-form-urlencoded"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "formData",
+            "description": "Username of student",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "password",
+            "in": "formData",
+            "description": "Password of student",
+            "required1": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {"type": "string"}
+          }
+        }
+      }
+    },
+    "/teachers/reset_password": {
+      "post": {
+        "tags": ["teacher"],
+        "summary": "Teacher Reset Password",
+        "description": "",
+        "operationId": "teacherResetPassword",
+        "consumes": ["application/x-www-form-urlencoded"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "old_password",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "new_password",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "confirm_new_password",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {"type": "string"}
+          }
+        }
+      }
+    },
+    "/students/edit_profile": {
+      "post": {
+        "tags": ["student"],
+        "summary": "Edit Student Profile",
+        "description": "",
+        "operationId": "editStudentProfile",
+        "consumes": ["application/x-www-form-urlencoded"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "formData",
+            "description": "Id of student",
+            "required1": true,
+            "type": "integer"
+          },
+          {
+            "name": "name",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "dob",
+            "in": "formData",
+            "description": "dd/mm/yyyy",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "primary_contact_number",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "preferred_contact_number",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "pick_up_time",
+            "in": "formData",
+            "description": "HH:MM",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "food_preference",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "ethnicity",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "allergies",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "medical_conditions",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {"type": "string"}
+          }
+        }
+      }
+    },
+    "/students/get_profile": {
+      "post": {
+        "tags": ["student"],
+        "summary": "Student Profile",
+        "description": "",
+        "operationId": "studentProfile",
+        "consumes": ["application/x-www-form-urlencoded"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "formData",
+            "description": "Id of student",
+            "required1": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {"type": "string"}
+          }
+        }
+      }
+    },
+    "/students/list": {
+      "post": {
+        "tags": ["student"],
+        "summary": "Student List",
+        "description": "",
+        "operationId": "studentList",
+        "consumes": ["application/x-www-form-urlencoded"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "teacher_id",
+            "in": "formData",
+            "description": "Id of teacher",
+            "required1": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {"type": "string"}
+          }
+        }
+      }
+    },
+    "/parents/login": {
+      "post": {
+        "tags": ["parent"],
+        "summary": "Parent Login",
+        "description": "",
+        "operationId": "parentLogin",
+        "consumes": ["application/x-www-form-urlencoded"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "formData",
+            "description": "Username of parent",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "password",
+            "in": "formData",
+            "description": "Password of parent",
+            "required1": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {"type": "string"}
+          }
+        }
+      }
+    },
+    "/parents/edit_profile": {
+      "post": {
+        "tags": ["parent"],
+        "summary": "Parent Profile",
+        "description": "",
+        "operationId": "parentProfile",
+        "consumes": ["application/x-www-form-urlencoded"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "formData",
+            "description": "Id of parent",
+            "required1": true,
+            "type": "integer"
+          },
+          {
+            "name": "name",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "contact_number",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "address",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "zipcode",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "rel_with_student",
+            "in": "formData",
+            "description": "Relation with student",
+            "required1": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {"type": "string"}
+          }
+        }
+      }
+    },
+    "/parents/get_profile": {
+      "post": {
+        "tags": ["parent"],
+        "summary": "Parent Profile",
+        "description": "",
+        "operationId": "parentProfile",
+        "consumes": ["application/x-www-form-urlencoded"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "formData",
+            "description": "Id of parent",
+            "required1": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {"type": "string"}
+          }
+        }
+      }
+    },
+    "/parents/reset_password": {
+      "post": {
+        "tags": ["parent"],
+        "summary": "Parent reset password",
+        "description": "",
+        "operationId": "parentResetPassword",
+        "consumes": ["application/x-www-form-urlencoded"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "old_password",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "new_password",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "confirm_new_password",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {"type": "string"}
+          }
+        }
+      }
+    },
+    "/activities/list": {
+      "post": {
+        "tags": ["activity"],
+        "summary": "Activity List",
+        "description": "",
+        "operationId": "activityList",
+        "consumes": ["application/x-www-form-urlencoded"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "integer"
+          },
+          {
+            "name": "from_date",
+            "in": "formData",
+            "description": "dd/mm/yy - Default is today",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "to_date",
+            "in": "formData",
+            "description": "dd/mm/yy - Default is today",
+            "required1": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {"type": "string"}
+          }
+        }
+      }
+    },
+    "/activities/save": {
+      "post": {
+        "tags": ["activity"],
+        "summary": "Activity Save",
+        "description": "",
+        "operationId": "activitySave",
+        "consumes": ["application/x-www-form-urlencoded"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "formData",
+            "description": "Keep it blank if want to create new activity",
+            "required1": true,
+            "type": "integer"
+          },
+          {
+            "name": "activity_type_id",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "integer"
+          },
+          {
+            "name": "student_id",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "integer"
+          },
+          {
+            "name": "time",
+            "in": "formData",
+            "description": "dd/mm/yy hh:mm:ss - Default is today's date and current time",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "comments",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {"type": "string"}
+          }
+        }
+      }
+    },
+    "/notifications/list": {
+      "post": {
+        "tags": ["notification"],
+        "summary": "Notification List",
+        "description": "",
+        "operationId": "notificationList",
+        "consumes": ["application/x-www-form-urlencoded"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "day_care_center_id",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "integer"
+          },
+          {
+            "name": "from_date",
+            "in": "formData",
+            "description": "dd/mm/yy - Default is today",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "to_date",
+            "in": "formData",
+            "description": "dd/mm/yy - Default is today",
+            "required1": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {"type": "string"}
+          }
+        }
+      }
+    },
+
+    "securityDefinitions": {
+      "petstore_auth": {
+        "type": "oauth2",
+        "authorizationUrl": "http://petstore.swagger.io/api/oauth/dialog",
+        "flow": "implicit",
+        "scopes": {
+          "write:pets": "modify pets in your account",
+          "read:pets": "read your pets"
+        }
+      },
+      "api_key": {
+        "type": "apiKey",
+        "name": "api_key",
+        "in": "header"
+      }
+    },
+    "definitions": {
+      "User": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "username": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "userStatus": {
+            "type": "integer",
+            "format": "int32",
+            "description": "User Status"
+          }
+        },
+        "xml": {
+          "name": "User"
+        }
+      },
+      "Tag": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "Tag"
+        }
+      },
+      "ApiResponse": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "##default"
+        }
+      }
+    }
+  }
+}
+

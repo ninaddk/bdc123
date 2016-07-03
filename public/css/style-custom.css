@@ -1,0 +1,137 @@
+body {
+  background-color: #fff;
+}
+.btn.active.focus, .btn.active:focus, .btn.focus, .btn:active.focus, .btn:active:focus, .btn:focus {
+   outline: none !important;
+}
+.navbar-fixed-top,
+.navbar-static-top {
+  background-color: #363f45;
+
+}
+.nav-header {
+  background-image: none;
+  background-color: #485b67;
+}
+.navbar-static-side {
+  background-color: #fefefe;
+  box-shadow: 1px -2px 3px 1px rgba(0,0,0,0.1);
+}
+#page-wrapper {
+  background-color: #f3f3f3;
+}
+.nav.navbar-top-links a.dropdown-toggle { color: #fff; }
+.nav .open > a, .nav .open > a:hover, .nav .open > a:focus {
+  background-color: transparent;
+}
+.navbar .dropdown-menu {
+  right: 8px !important;
+}
+.logo {
+  display: block;
+  width: 100px;
+  margin: 0 auto 10px auto;
+}
+.navHeadTxt {
+  text-align: center;
+  color: #f1f1f1;
+}
+.daycareName {
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.daycareCenterName {
+  font-size: 12px;
+  color: #7d8b93;
+}
+.nav > li > a {
+  color: #797979;
+  border-bottom: 1px solid #E4E4E4
+}
+.nav > li > a:hover,
+.nav > li.active > a { background-color: #60a9dc !important; }
+
+.dashboardEventDate {
+  background-color: #fff;
+  border-radius: 3px;
+  width: 40px;
+  text-align: center;
+  padding-bottom: 2px;
+  font-size: 14px;
+  color: #333;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+.dashboardEventDate span {
+  display: block;
+  background-color: #e84750;
+  color: #fff;
+  border-radius: 3px 3px 0 0;
+  font-size: 12px;
+  padding: 1px 0;
+  font-weight: 400;
+  margin-bottom: 2px;
+}
+.dailyStatistics {
+  padding: 18px 30px;
+}
+.dailyStatistics h3 {
+  font-size: 20px;
+  font-weight: 300;
+  margin: 0 0 15px 0;
+}
+.dailyStatistics h4 {
+  text-transform: uppercase;
+  font-size: 13px;
+  font-weight: 300;
+  COLOR: #BBB;
+  letter-spacing: 0.5px;
+  margin: 0 0 5px 0;
+}
+.dailyStatistics .number {
+  font-size: 28px;
+  line-height: 28px;
+}
+
+.btnLoaderWrap {
+  display: inline-block;
+  position: relative;
+}
+.btnLoaderWrap .btnLoader {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+}
+.btnLoaderWrap .sk-spinner-three-bounce.sk-spinner {
+  position: relative;
+  top: 50%;
+  margin-top: -9px;
+}
+.btnLoaderWrap .sk-spinner-three-bounce div {
+  background-color: #fff;
+  width: 10px;
+  height: 10px;
+}
+.btn-primary.active.focus,
+.btn-primary.active:focus,
+.btn-primary.focus,
+.btn-primary:active.focus,
+.btn-primary:active:focus, .btn:focus {
+  background-color: #1ab394;
+  border-color: #1ab394;
+  color: #FFFFFF;
+}
+
+.btnLoaderWrapActive .btn-primary { color: #1ab394 !important; }
+.btnLoaderWrapActive .btnLoader { display: block; }
+
+.requiredMsg {
+  text-align: right;
+  margin-bottom: 20px;
+  font-size: 11px;
+  margin-top: -10px;
+}

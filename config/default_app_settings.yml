@@ -1,0 +1,6 @@
+s3:
+
+
+auth:
+  superadmin: 'superadmin'
+  superadmin-password: 'pas$w0rd'

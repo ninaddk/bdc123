@@ -1,0 +1,94 @@
+<div class="sidebar-content">
+<div class="sidebard-panel" style="min-height: 1222px;">
+  <div>
+    <h4>Recent Activities</h4>
+
+    <% if @activities.empty? %>
+        <div class="ibox-content">
+          <p>There are no activities for today.</p>
+        </div>
+    <% else %>
+
+        <% @activities.each do |activity| %>
+            <div class="feed-element">
+              <a href="#" class="pull-left">
+                <img alt="image" class="img-circle" src="<%= activity.student_image_thumb %>">
+              </a>
+              <div class="media-body">
+                <strong><%= activity.student_name %></strong> <%= activity.title %>
+                <br>
+                <small class="text-muted"><i class="fa fa-clock-o"></i> <%= activity.time.strftime('%I:%M:%S %p') %></small>
+              </div>
+            </div>
+        <% end %>
+    <% end %>
+  </div>
+  <br/>
+  <div class="m-t-md">
+    <h4>Upcoming Events</h4>
+
+    <% if @notifications.empty? %>
+        <div class="ibox-content">
+          <p>There are no activities for today.</p>
+        </div>
+    <% else %>
+
+        <% @notifications.each do |notification| %>
+            <div class="feed-element">
+              <a href="#" class="pull-left">
+                <div class="dashboardEventDate">
+                  <span><%= notification.due_date.strftime('%^b') %></span>
+                  <%= notification.due_date.strftime('%d') %>
+                </div>
+              </a>
+              <div class="media-body">
+                <strong><%= notification.day_care_center.present? ? notification.day_care_center.name : '' %></strong> <%= notification.name %>
+                <br>
+                <small class="text-muted"><i class="fa fa-clock-o"></i> <%= notification.due_date.strftime('%I:%M:%S %p') %></small>
+              </div>
+            </div>
+        <% end %>
+    <% end %>
+  </div>
+
+</div>
+
+<div class="row border-bottom white-bg dashboard-header dailyStatistics">
+  <h3>Daily Statistics</h3>
+  <div class="row">
+    <div class="col-xs-3">
+      <h4>Students</h4>
+      <div class="number"><%= @students_count %></div>
+    </div>
+
+    <div class="col-xs-3">
+      <h4>Student Checked-in</h4>
+      <div class="number"><%= @students_check_in_count %></div>
+    </div>
+
+    <div class="col-xs-3">
+      <h4>Students Checked-out</h4>
+      <div class="number"><%= @students_check_out_count %></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrapper wrapper-content">
+  <div class="row">
+    <% @dataPoints.each do |point| %>
+        <div class="col-lg-4">
+          <div class="ibox float-e-margins">
+            <div class="ibox-title">
+              <span class="label label-success pull-right">Branch</span>
+              <h5><%= point[0] %></h5>
+            </div>
+            <div class="ibox-content">
+              <h1 class="no-margins"><%= point[1] %></h1>
+              <small>Total student</small>
+            </div>
+          </div>
+        </div>
+    <% end %>
+  </div>
+  </div>
+</div>

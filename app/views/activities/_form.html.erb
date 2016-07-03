@@ -1,0 +1,81 @@
+<div class="modal inmodal" id="activityForm" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content animated fadeIn">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span><span class="sr-only">Close</span>
+        </button>
+        <h4 class="modal-title ng-scope">Add activity</h4>
+      </div>
+
+      <form role="form" onsubmit="saveactivity(); return false;">
+        <div class="modal-body">
+          <div id="formErrorDiv" style="display: none"></div>
+
+          <input type="hidden" id="activity_id" name="activity_id">
+          <div class="requiredMsg">All fields with <span>*</span> mark are required</div>
+
+          <div class="row">
+            <div class="col-xs-6 form-group">
+              <label for="type">Type <span>*</span></label>
+              <select class="form-control" id="type" name="type">
+                <option value="">Select Type</option>
+                <% @activityTypes.each do |value| %>
+                    <option value="<%= value[0] %>"><%= value[1] %></option>
+                <% end %>
+              </select>
+            </div>
+
+            <div class="col-xs-6 form-group">
+              <label for="student">Student <span>*</span></label>
+              <select class="form-control" id="student" name="student">
+                <option value="">Select Student</option>
+                <% @students.each do |s| %>
+                    <option value="<%= s.id %>"><%= s.name %></option>
+                <% end %>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-xs-6 form-group">
+              <label for="time">Date</label>
+              <div class="input-group date">
+                <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" name="date" id="date">
+              </div>
+            </div>
+
+            <div class="col-xs-6 form-group">
+              <label for="time">Time</label>
+              <div class="input-group clockpicker" data-autoclose="true">
+                <input type="text" class="form-control" name="time" id="time">
+                <span class="input-group-addon">
+                    <span class="fa fa-clock-o"></span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="comments">Comments</label>
+              <textarea class="form-control" id="comments" name="comments"></textarea>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <div class="text-center">
+            <div class="btnLoaderWrap" id="activityFormSubmitBtn">
+              <button type="submit" class="btn btn-primary submitButton">Add activity</button>
+              <div class="btnLoader">
+                <div class="sk-spinner sk-spinner-three-bounce">
+                  <div class="sk-bounce1"></div>
+                  <div class="sk-bounce2"></div>
+                  <div class="sk-bounce3"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,185 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+  <div class="col-xs-10">
+    <h2>Day Care</h2>
+    <ol class="breadcrumb">
+      <li>
+        <a href="index.html">Home</a>
+      </li>
+      <li class="active">
+        <strong>Day Care</strong>
+      </li>
+    </ol>
+  </div>
+
+  <div class="col-xs-2">
+    <a href="javascript:void(0)" onclick="showAddDayCareForm()" style="    float: right;
+            font-size: 38px;
+            margin: 16px 10px 0 0;
+            color: #1ab394;"><i class="fa fa-plus-circle"></i></a>
+  </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+
+  <div class="ibox float-e-margins">
+    <div class="ibox-content">
+      <% if !flash[:notice].blank? %>
+          <div class="alert alert-success"><%= flash[:notice] %></div>
+      <% end %>
+
+
+      <table class="table table-striped">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Address</th>
+          <th>Zipcode</th>
+          <th>Url</th>
+          <th class="text-center">Actions</th>
+        </tr>
+        </thead>
+        <tbody id="dayCareDataDiv">
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<%= render partial: 'form' %>
+
+<script type="text/javascript">
+    $( document ).ready(function() {
+        populateHtml();
+    });
+
+    var day_cares = new Array();
+    <% @dayCares.each do |daycare| %>
+    day_cares[<%=daycare.id%>] = {
+        id: "<%=raw daycare.id %>",
+        name: "<%=raw json_string daycare.name %>",
+        address: "<%=raw json_string daycare.address %>",
+        zipcode: "<%=raw json_string daycare.zipcode %>",
+        url_name: "<%=raw json_string daycare.url_name %>"
+    };
+    <% end %>
+
+    function populateHtml(){
+        var str = ""
+        for(i in day_cares){
+            var daycare = day_cares[i];
+            str += '<tr class="tblrow-'+ daycare.id +'">'+
+                    '<td id="day-care-name-'+ daycare.id +'">'+ daycare.name +'</td>'+
+                    '<td>'+ daycare.address +'</td>'+
+                    '<td>'+ daycare.zipcode +'</td>'+
+                    '<td>'+ daycare.url_name +'</td>'+
+                    '<td class="text-center">'+
+                    '<a href="javascript:void(0)" onclick="showEditDayCareForm('+ i +')"><i class="fa fa-pencil-square-o text-navy"></i></a> &nbsp; '+
+                    "<a href=\"javascript:void(0)\" onclick=\"deleteDayCareConfirm("+ daycare.id +")\"><i class=\"fa fa-trash-o text-navy\"></i></a>"+
+                    '</td>'+
+                    '</tr>';
+        }
+        $("#dayCareDataDiv").html(str);
+    };
+
+    function showAddDayCareForm(){
+        resetDayCareForm();
+        $("#dayCareForm .submitButton, #dayCareForm .modal-title").text("Add Day Care");
+        $('#dayCareForm').modal('show');
+    };
+
+    function showEditDayCareForm(id){
+        resetDayCareForm();
+
+        var daycare = day_cares[id];
+        $("#day_care_id").val(daycare.id);
+        $("#name").val(daycare.name);
+        $("#address").val(daycare.address);
+        $("#zipcode").val(daycare.zipcode);
+        $("#url_name").val(daycare.url_name);
+
+        $("#dayCareForm .submitButton, #dayCareForm .modal-title").text("Update Day Care");
+        $('#dayCareForm').modal('show');
+    };
+
+    function saveDayCare() {
+        $("#dayCareFormSubmitBtn").addClass("btnLoaderWrapActive");
+        var name = $("#name").val();
+        var address = $("#address").val();
+        var zipcode = $("#zipcode").val();
+        var url_name = $("#url_name").val();
+
+        $.ajax({
+            url: '/day_cares/save',
+            type: 'POST',
+            data: {
+                authenticity_token: '<%= form_authenticity_token %>',
+                id: $('#day_care_id').val() ? $('#day_care_id').val() : 0,
+                name: name,
+                address: address,
+                zipcode: zipcode,
+                url_name: url_name
+            },
+            success: function (data) {
+                $("#dayCareFormSubmitBtn").removeClass("btnLoaderWrapActive");
+                if(isErrorResponce(data)){
+                    showFormError('formErrorDiv', getErrorMessage(data));
+                    return;
+                }
+
+                $('#dayCareForm').modal('hide');
+
+                //updateData(data.contents);
+                showTosterMsg('success', 'Data saved successfully');
+                location.reload();
+            }
+        });
+    };
+
+    function updateData(daycare){
+        console.log(daycare);
+        console.log(day_cares);
+
+        if(day_cares[daycare.id] == null ){
+            var newObj = { id: daycare.id, name: daycare.name, address: daycare.address, zipcode: daycare.zipcode, url_name: daycare.url_name};
+            day_cares.push(newObj);
+
+        }else {
+            day_cares[daycare.id].name = daycare.name;
+            day_cares[daycare.id].address = daycare.address;
+            day_cares[daycare.id].zipcode = daycare.zipcode;
+            day_cares[daycare.id].url_name = daycare.url_name;
+        }
+
+        populateHtml();
+    };
+
+    function deleteDayCareConfirm(id) {
+        var r = confirm("Do you want to delete " + $("#day-care-name-"+id).text() + "\nIt will delete all associated Day Care Centers and Users");
+        if (r == true) {
+            $.ajax({
+                url: '/day_cares/delete/' + id,
+                type: 'GET',
+                success: function (data) {
+                    if(isErrorResponce(data)){
+                        showFormError('formErrorDiv', getErrorMessage(data));
+                        return;
+                    }
+
+                    //$(".tblrow-" + id).remove();
+                    showTosterMsg('success', name+' removed successfully');
+                    location.reload();
+                }
+            });
+        }
+    };
+
+    function resetDayCareForm(){
+        $("#day_care_id").val('');
+        $("#name").val('');
+        $("#address").val('');
+        $("#zipcode").val('');
+        $("#url_name").val('');
+    };
+</script>

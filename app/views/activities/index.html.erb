@@ -1,0 +1,198 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+  <div class="col-xs-10">
+    <h2>Activity</h2>
+    <ol class="breadcrumb">
+      <li>
+        <a href="index.html">Home</a>
+      </li>
+      <li class="active">
+        <strong>Activities</strong>
+      </li>
+    </ol>
+  </div>
+
+  <div class="col-xs-2">
+    <a href="javascript:void(0);" onclick="showAddactivityForm()" style="    float: right;
+            font-size: 38px;
+            margin: 16px 10px 0 0;
+            color: #1ab394;"><i class="fa fa-plus-circle"></i></a>
+  </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+
+  <div class="ibox float-e-margins">
+    <div class="ibox-content">
+      <% if !flash[:notice].blank? %>
+          <div class="alert alert-success"><%= flash[:notice] %></div>
+      <% end %>
+
+
+      <table class="table table-striped">
+        <thead>
+        <tr>
+          <th>Type</th>
+          <th>Student</th>
+          <th>Time</th>
+          <th>Comment</th>
+          <th class="text-center">Actions</th>
+        </tr>
+        </thead>
+        <tbody id="activityDataDiv">
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<%= render partial: 'form' %>
+
+<script type="text/javascript">
+    $( document ).ready(function() {
+        populateHtml();
+    });
+
+    var activities = new Array();
+    <%
+        num = 0
+        @activities.each do |activity|
+       %>
+        activities[<%= num %>] = {
+            id: "<%=raw activity.id %>",
+            type_id: "<%=raw activity.activity_type_id %>",
+            student_name: "<%=raw json_string activity.student_name %>",
+            type_name: "<%=raw ENM_ACTIVITY_TYPE.get_name_by_id(activity.activity_type_id) %>",
+            student_id: "<%=raw activity.student_id %>",
+            time: "<%= get_date_time_format activity.time %>",
+            comment: "<%=raw json_string activity.comment %>"
+        };
+    <%
+        num = num+1
+        end
+    %>
+
+    function populateHtml(){
+        var str = ""
+        for(i in activities){
+            var activity = activities[i];
+            str += '<tr class="tblrow-'+ activity.id +'">'+
+                    '<td id="activity_name-'+ activity.id +'">'+ activity.type_name +'</td>'+
+                    '<td>'+ activity.student_name +'</td>'+
+                    '<td>'+ activity.time +'</td>'+
+                    '<td>'+ activity.comment +'</td>'+
+                    '<td class="text-center">'+
+                        '<a href="javascript:void(0)" onclick="showEditactivityForm('+ i +')"><i class="fa fa-pencil-square-o text-navy"></i></a> &nbsp; '+
+                        "<a href=\"javascript:void(0)\" onclick=\"deleteactivityConfirm("+ activity.id +")\"><i class=\"fa fa-trash-o text-navy\"></i></a>"+
+                    '</td>'+
+                    '</tr>';
+        }
+        $("#activityDataDiv").html(str);
+    };
+
+    function showAddactivityForm(){
+        resetactivityForm();
+        $("#activityForm .submitButton, #activityForm .modal-title").text("Add activity");
+        $('#activityForm').modal('show');
+    };
+
+    function showEditactivityForm(id){
+        resetactivityForm();
+
+        var activity = activities[id];
+        $("#activity_id").val(activity.id);
+        $("#type").val(activity.type_id);
+        $("#student").val(activity.student_id);
+        $("#date").val(getDateFormatDDMMYY(activity.time));
+        $("#time").val(getDateFormatHHMMSS(activity.time));
+        $("#comments").val(activity.comment);
+
+        $("#activityForm .submitButton, #activityForm .modal-title").text("Update activity");
+        $('#activityForm').modal('show');
+    };
+
+    function saveactivity() {
+        $("#activityFormSubmitBtn").addClass("btnLoaderWrapActive");
+        var type = $("#type").val();
+        var student = $("#student").val();
+        var date = $("#date").val();
+        var time = $("#time").val();
+        var comments = $("#comments").val();
+
+        $.ajax({
+            url: '/activities/save',
+            type: 'POST',
+            data: {
+                authenticity_token: '<%= form_authenticity_token %>',
+                id: $('#activity_id').val() ? $('#activity_id').val() : 0,
+                activity_type_id: type,
+                student_id: student,
+                time: date+' '+time,
+                comments: comments
+            },
+            success: function (data) {
+                $("#activityFormSubmitBtn").removeClass("btnLoaderWrapActive");
+                if(isErrorResponce(data)){
+                    showFormError('formErrorDiv', getErrorMessage(data));
+                    return;
+                }
+
+                $('#activityForm').modal('hide');
+
+                //updateData(data.contents);
+                showTosterMsg('success', 'Data saved successfully');
+                location.reload();
+            }
+        });
+    };
+
+    function updateData(activity){
+        console.log(activity);
+        if(activities[activity.id] == null ){
+            var newObj = {
+                id: activity.id,
+                name: activity.name,
+                date: activity.date,
+                reminder_date: activity.reminder_date == null? '' : activity.reminder_date
+            };
+            activities.push(newObj);
+
+        }else {
+            activities[activity.id].name = activity.name;
+            activities[activity.id].date = activity.date;
+            activities[activity.id].reminder_date = activity.reminder_date;
+        }
+
+        populateHtml();
+    };
+
+    function deleteactivityConfirm(id) {
+        var r = confirm("Do you want to delete " + $("#activity_name-"+id).text());
+        if (r == true) {
+            $.ajax({
+                url: '/activities/delete/' + id,
+                type: 'GET',
+                success: function (data) {
+                    if(isErrorResponce(data)){
+                        showFormError('formErrorDiv', getErrorMessage(data));
+                        return;
+                    }
+
+                    //$(".tblrow-" + id).remove();
+                    showTosterMsg('success', name+' removed successfully');
+                    location.reload();
+                }
+            });
+        }
+    };
+
+    function resetactivityForm(){
+        $("#activity_id").val('');
+        $("#type").val('');
+        $("#student").val('');
+        $("#date").val('');
+        $("#time").val('');
+        $("#comments").val('');
+    };
+</script>

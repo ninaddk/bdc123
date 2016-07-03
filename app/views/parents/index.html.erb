@@ -1,0 +1,296 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+  <div class="col-xs-10">
+    <h2>Parent</h2>
+    <ol class="breadcrumb">
+      <li>
+        <a href="index.html">Home</a>
+      </li>
+      <li class="active">
+        <strong>Parents</strong>
+      </li>
+    </ol>
+  </div>
+
+  <div class="col-xs-2">
+    <a href="javascript:void(0);" onclick="showAddParentForm()" style="    float: right;
+            font-size: 38px;
+            margin: 16px 10px 0 0;
+            color: #1ab394;"><i class="fa fa-plus-circle"></i></a>
+  </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+
+  <div class="ibox float-e-margins">
+    <div class="ibox-content">
+      <% if !flash[:notice].blank? %>
+          <div class="alert alert-success"><%= flash[:notice] %></div>
+      <% end %>
+
+
+      <table class="table table-striped">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Contact</th>
+          <th>Address</th>
+          <th>Children</th>
+          <th class="text-center">Actions</th>
+        </tr>
+        </thead>
+        <tbody id="parentDataDiv">
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<%= render partial: 'form' %>
+
+<script type="text/javascript">
+    var parents = {};
+
+    $( document ).ready(function() {
+        getParentList();
+    });
+
+    function getParentList(){
+        $.ajax({
+            url: '/parents/list',
+            type: 'GET',
+            success: function (data) {
+                parents = data.contents;
+                console.log(parents);
+                populateHtml();
+            }
+        });
+    };
+
+    function populateHtml(){
+        var str = ""
+        for(i in parents){
+            var parent = parents[i];
+
+            var student_str = "";
+            for(n in parent.students){
+                var student = parent.students[n];
+                student_str = student_str+"- "+student.name+"<br/>";
+            }
+
+            str += '<tr class="tblrow-'+ parent.id +'">'+
+                    '<td id="parent_name-'+ parent.id +'">'+ parent.name +'</td>'+
+                    '<td>'+ parent.username +'</td>'+
+                    '<td>'+ parent.email +'</td>'+
+                    '<td>'+ gerRowHtml(parent.contact_number) +'</td>'+
+                    '<td>'+ gerRowHtml(parent.address) +'<br/>'+ gerRowHtml(parent.zipcode) +'</td>'+
+                    '<td>'+ student_str +'</td>'+
+                    '<td class="text-center">'+
+                        '<a href="javascript:void(0)" title="Add Children" onclick="showStudentsForm('+ i +')"><i class="fa fa-user text-navy"></i></a> &nbsp; '+
+                        '<a href="javascript:void(0)" title="Edit Parent" onclick="showEditParentForm('+ i +')"><i class="fa fa-pencil-square-o text-navy"></i></a> &nbsp; '+
+                        "<a href=\"javascript:void(0)\" title=\"Delete Parent\" onclick=\"deleteParentConfirm("+ parent.id +")\"><i class=\"fa fa-trash-o text-navy\"></i></a>"+
+                    '</td>'+
+                    '</tr>';
+        }
+        $("#parentDataDiv").html(str);
+    };
+
+    function showAddParentForm(){
+        resetParentForm();
+        $("#username").prop("readonly", false);
+        $("#passwordFieldWrap").css("display","block");
+        $("#parentForm .submitButton, #parentForm .modal-title").text("Add Parent");
+        $('#parentForm').modal('show');
+    };
+
+    function showEditParentForm(id){
+        resetParentForm();
+
+        var parent = parents[id];
+        $("#parent_id").val(parent.id);
+        $("#name").val(parent.name);
+        $("#username").val(parent.username).prop("readonly", true);
+        $("#passwordFieldWrap").css("display","none");
+        $("#email").val(parent.email);
+        $("#contact_number").val(parent.contact_number);
+        $("#address").val(parent.address);
+        $("#zipcode").val(parent.zipcode);
+
+        $("#parentForm .submitButton, #parentForm .modal-title").text("Update Parent");
+        $('#parentForm').modal('show');
+    };
+
+    function saveParent() {
+        $("#parentFormSubmitBtn").addClass("btnLoaderWrapActive");
+        var name = $("#name").val();
+        var username = $("#username").val();
+        var password = $("#password").val();
+        var confirm_password = $("#confirm_password").val();
+        var email = $("#email").val();
+        var contact_number = $("#contact_number").val();
+        var address = $("#address").val();
+        var zipcode = $("#zipcode").val();
+
+        $.ajax({
+            url: '/parents/save',
+            type: 'POST',
+            data: {
+                authenticity_token: '<%= form_authenticity_token %>',
+                id: $('#parent_id').val() ? $('#parent_id').val() : 0,
+                name: name,
+                username: username,
+                password: password,
+                confirm_password: confirm_password,
+                email: email,
+                contact_number: contact_number,
+                address: address,
+                zipcode: zipcode
+            },
+            success: function (data) {
+                $("#parentFormSubmitBtn").removeClass("btnLoaderWrapActive");
+                if(isErrorResponce(data)){
+                    showFormError('formErrorDiv', getErrorMessage(data));
+                    return;
+                }
+
+                $('#parentForm').modal('hide');
+
+                //updateData(data.contents);
+                showTosterMsg('success', 'Data saved successfully');
+                location.reload();
+            }
+        });
+    };
+
+    function deleteParentConfirm(id) {
+        var r = confirm("Do you want to delete " + $("#parent_name-"+id).text());
+        if (r == true) {
+            $.ajax({
+                url: '/parents/delete/' + id,
+                type: 'GET',
+                success: function (data) {
+                    if(isErrorResponce(data)){
+                        showFormError('formErrorDiv', getErrorMessage(data));
+                        return;
+                    }
+
+                    //$(".tblrow-" + id).remove();
+                    showTosterMsg('success', name+' removed successfully');
+                    location.reload();
+                }
+            });
+        }
+    };
+
+    function resetParentForm(){
+        $("#parent_id").val('');
+        $("#name").val('');
+        $("#username").val('');
+        $("#password").val('');
+        $("#confirm_password").val('');
+        $("#email").val('');
+        $("#contact_number").val('');
+        $("#address").val('');
+        $("#zipcode").val('');
+    };
+
+    var students_arr = [];
+    <% @students.each do |d| %>
+        students_arr[<%= d.id %>] = "<%= json_string d.name %>";
+    <% end %>
+
+    function getStudentSelectField(selected_id){
+        var str = "";
+        for(i in students_arr){
+            var selected = "";
+            if(selected_id == i ){ selected = "selected" }
+            str = str + '<option value="'+i+'" '+selected+'>'+ students_arr[i] +'</option>';
+        }
+        return '<select class="form-control"><option value="">Select child</option>'+ str +'</select>';
+    };
+
+    function showStudentsForm(key){
+        var parent = parents[key];
+        $("#parent_id").val(parent.id);
+
+        var student_str = "";
+        for(i in parent.students){
+            var student = parent.students[i];
+            var rel = parent.parent_student_relations[i];
+
+            var student_str = student_str+'<div class="row relatedStudents">' +
+                    '<div class="col-xs-6 form-group">' +
+                    getStudentSelectField(student.id) +
+                    '</div>' +
+                    '<div class="col-xs-5 form-group">' +
+                    '<input class="form-control" type="text" value="'+ rel.relation_with_student +'">' +
+                    '<a href="javascript:void(0)" class="removeRow" onclick="removeStudentRow(this)"><i class="fa fa-close"></i></a>' +
+                    '</div>' +
+                    '</div>';
+
+        }
+        $("#related_students").html(student_str);
+
+        $('#assignedStudentForm').modal('show');
+    };
+
+    function addStudentRow(){
+        var str = '<div class="row relatedStudents">' +
+                    '<div class="col-xs-6 form-group">' +
+                        getStudentSelectField(-1) +
+                    '</div>' +
+                    '<div class="col-xs-5 form-group">' +
+                        '<input class="form-control" type="text">' +
+                        '<a href="javascript:void(0)" class="removeRow" onclick="removeStudentRow(this)"><i class="fa fa-close"></i></a>' +
+                    '</div>' +
+                '</div>';
+        $("#related_students").append(str);
+    };
+
+    function removeStudentRow(thisEle){
+        $(thisEle).parent(".form-group").parent(".row").remove();
+    }
+
+    function saveRelatedStudents(parent_id) {
+        var related_students = {};
+        $(".relatedStudents").each(function () {
+            if ($(this).find('select').val()) {
+                related_students[$(this).find('select').val()] = $(this).find('input').val();
+            }
+        });
+
+        $.ajax({
+            url: '/parents/student_relation',
+            type: 'POST',
+            data: {
+                authenticity_token: '<%= form_authenticity_token %>',
+                parent_id: $("#parent_id").val(),
+                related_students: related_students
+            },
+            success: function (data) {
+                if (isErrorResponce(data)) {
+                    showFormError('childFormErrorDiv', getErrorMessage(data));
+                    return;
+                }
+
+                $('#assignedStudentForm').modal('hide');
+
+                //updateData(data.contents);
+                showTosterMsg('success', 'Data saved successfully');
+                location.reload();
+            }
+        });
+    }
+</script>
+
+<style>
+  .removeRow {
+      position: absolute;
+      right: -10px;
+      top: 5px;
+  }
+  #related_students .row:first-child .removeRow { display: none; }
+</style>

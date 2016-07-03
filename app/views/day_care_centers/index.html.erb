@@ -1,0 +1,185 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+  <div class="col-xs-10">
+    <h2>Day Care Branch</h2>
+    <ol class="breadcrumb">
+      <li>
+        <a href="index.html">Home</a>
+      </li>
+      <li class="active">
+        <strong>Day Care Branch</strong>
+      </li>
+    </ol>
+  </div>
+
+  <div class="col-xs-2">
+    <a href="javascript:void(0)" onclick="showAddDayCareCenterForm()" style="    float: right;
+            font-size: 38px;
+            margin: 16px 10px 0 0;
+            color: #1ab394;"><i class="fa fa-plus-circle"></i></a>
+  </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+
+  <div class="ibox float-e-margins">
+    <div class="ibox-content">
+      <% if !flash[:notice].blank? %>
+          <div class="alert alert-success"><%= flash[:notice] %></div>
+      <% end %>
+
+
+      <table class="table table-striped">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Day Care</th>
+          <th>Address</th>
+          <th>Zipcode</th>
+          <th class="text-center">Actions</th>
+        </tr>
+        </thead>
+        <tbody id="dayCareDataCenterDiv">
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+
+<%= render partial: 'form' %>
+
+<script type="text/javascript">
+    $( document ).ready(function() {
+        populateHtml();
+    });
+
+    var day_care_centers = new Array();
+    <% @dayCareCenters.each do |day_care_center| %>
+        day_care_centers[<%=day_care_center.id%>] = {
+            id: "<%=raw day_care_center.id %>",
+            name: "<%=raw json_string day_care_center.name %>",
+            day_care: "<%=raw day_care_center.day_care_id %>",
+            day_care_name: "<%=raw json_string day_care_center.day_care.present? ? day_care_center.day_care.name : '' %>",
+            address: "<%=raw json_string day_care_center.address %>",
+            zipcode: "<%=raw json_string day_care_center.zipcode %>"
+        };
+    <% end %>
+
+    function populateHtml(){
+        var str = ""
+        for(i in day_care_centers){
+            var day_care_center = day_care_centers[i];
+            str += '<tr class="tblrow-'+ day_care_center.id +'">'+
+                    '<td id="day_care_center_name-'+ day_care_center.id +'">'+ day_care_center.name +'</td>'+
+                    '<td>'+ day_care_center.day_care_name +'</td>'+
+                    '<td>'+ day_care_center.address +'</td>'+
+                    '<td>'+ day_care_center.zipcode +'</td>'+
+                    '<td class="text-center">'+
+                    '<a href="javascript:void(0)" onclick="showEditDayCareCenterForm('+ i +')"><i class="fa fa-pencil-square-o text-navy"></i></a> &nbsp; '+
+                    "<a href=\"javascript:void(0)\" onclick=\"deleteDayCareCenterConfirm("+ day_care_center.id +")\"><i class=\"fa fa-trash-o text-navy\"></i></a>"+
+                    '</td>'+
+                    '</tr>';
+        }
+        $("#dayCareDataCenterDiv").html(str);
+    };
+
+    function showAddDayCareCenterForm(){
+        resetDayCareCenterForm();
+        $("#dayCareCenterForm .submitButton, #dayCareCenterForm .modal-title").text("Add Day Care Branch");
+        $('#dayCareCenterForm').modal('show');
+    };
+
+    function showEditDayCareCenterForm(id){
+        resetDayCareCenterForm();
+
+        var day_care_center = day_care_centers[id];
+        $("#day_care_center_id").val(day_care_center.id);
+        $("#name").val(day_care_center.name);
+        $("#day_care").val(day_care_center.day_care);
+        $("#address").val(day_care_center.address);
+        $("#zipcode").val(day_care_center.zipcode);
+
+        $("#dayCareCenterForm .submitButton, #dayCareCenterForm .modal-title").text("Update Day Care Branch");
+        $('#dayCareCenterForm').modal('show');
+    };
+
+    function saveDayCareCenter() {
+        $("#dayCareCenterFormSubmitBtn").addClass("btnLoaderWrapActive");
+        var name = $("#name").val();
+        var day_care = $("#day_care").val();
+        var address = $("#address").val();
+        var zipcode = $("#zipcode").val();
+
+        $.ajax({
+            url: '/day_care_centers/save',
+            type: 'POST',
+            data: {
+                authenticity_token: '<%= form_authenticity_token %>',
+                id: $('#day_care_center_id').val() ? $('#day_care_center_id').val() : 0,
+                name: name,
+                day_care: day_care,
+                address: address,
+                zipcode: zipcode
+            },
+            success: function (data) {
+                $("#dayCareCenterFormSubmitBtn").removeClass("btnLoaderWrapActive");
+                if(isErrorResponce(data)){
+                    showFormError('formErrorDiv', getErrorMessage(data));
+                    return;
+                }
+
+                $('#dayCareCenterForm').modal('hide');
+
+                //updateData(data.contents);
+                showTosterMsg('success', 'Data saved successfully');
+                location.reload();
+            }
+        });
+    };
+
+    function updateData(day_care_center){
+        if(day_care_centers[day_care_center.id] == null ){
+            var newObj = { id: day_care_center.id, name: day_care_center.name, address: day_care_center.address, zipcode: day_care_center.zipcode};
+            day_care_centers.push(newObj);
+
+        }else {
+            day_care_centers[day_care_center.id].name = day_care_center.name;
+            day_care_centers[day_care_center.id].day_care = day_care_center.day_care;
+            day_care_centers[day_care_center.id].address = day_care_center.address;
+            day_care_centers[day_care_center.id].zipcode = day_care_center.zipcode;
+        }
+
+        populateHtml();
+    };
+
+    function deleteDayCareCenterConfirm(id) {
+        var r = confirm("Do you want to delete " + $("#day_care_center_name-"+id).text() + "\nIt will delete all associated Users ");
+        if (r == true) {
+            $.ajax({
+                url: '/day_care_centers/delete/' + id,
+                type: 'GET',
+                success: function (data) {
+                    if(isErrorResponce(data)){
+                        showFormError('formErrorDiv', getErrorMessage(data));
+                        return;
+                    }
+
+
+                    //$(".tblrow-" + id).remove();
+                    showTosterMsg('success', name+' removed successfully');
+                    location.reload();
+                }
+            });
+        }
+    };
+
+    function resetDayCareCenterForm(){
+        $("#day_care_center_id").val('');
+        $("#name").val('');
+        $("#address").val('');
+        $("#zipcode").val('');
+        $("#url_name").val('');
+    };
+</script>

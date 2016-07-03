@@ -1,0 +1,74 @@
+<div class="modal inmodal" id="userForm" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content animated fadeIn">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span><span class="sr-only">Close</span>
+        </button>
+        <h4 class="modal-title ng-scope">Add Parent</h4>
+      </div>
+
+      <form role="form" onsubmit="saveUser(); return false;">
+        <div class="modal-body">
+          <div id="formErrorDiv" style="display: none"></div>
+
+          <input type="hidden" id="user_id" name="user_id">
+          <div class="requiredMsg">All fields with <span>*</span> mark are required</div>
+          <div class="row">
+            <div class="col-xs-6 form-group">
+              <label for="name">Name <span>*</span></label>
+              <input class="form-control" type="text" name="name" id="name">
+            </div>
+
+            <div class="col-xs-6 form-group">
+              <label for="username">Username <span>*</span></label>
+              <input class="form-control" type="text" name="username" id="username">
+            </div>
+          </div>
+
+          <div class="row" id="passwordFieldWrap">
+            <div class="col-xs-6 form-group">
+              <label for="password">Password <span>*</span></label>
+              <input class="form-control" type="password" name="password" id="password">
+            </div>
+
+            <div class="col-xs-6 form-group">
+              <label for="confirm_password">Confirm Password <span>*</span></label>
+              <input class="form-control" type="password" name="confirm_password" id="confirm_password">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-xs-6 form-group">
+              <label for="email">Email <span>*</span></label>
+              <input class="form-control" type="text" name="email" id="email">
+            </div>
+
+            <div class="col-xs-6 form-group">
+              <label for="day_care">Day Care <span>*</span></label>
+              <select class="form-control" name="day_care" id="day_care">
+                <option value="">Select Day Care</option>
+                <% @daycare.each do |d| %>
+                    <option value="<%= d.id %>"><%= d.name %></option>
+                <% end %>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="text-center">
+            <div class="btnLoaderWrap" id="userFormSubmitBtn">
+              <button type="submit" class="btn btn-primary submitButton">Add User</button>
+              <div class="btnLoader">
+                <div class="sk-spinner sk-spinner-three-bounce">
+                  <div class="sk-bounce1"></div>
+                  <div class="sk-bounce2"></div>
+                  <div class="sk-bounce3"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

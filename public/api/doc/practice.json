@@ -1,0 +1,392 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": " ",
+    "version": "1.0.0",
+    "title": ""
+  },
+  "host": "",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "setup",
+      "description": "Setup"
+    },{
+      "name": "configure",
+      "description": "Configure"
+    },{
+      "name": "settings",
+      "description": "Settings & Preferences"
+    },{
+      "name": "appointments",
+      "description": "Appointments"
+    }
+  ],
+  "schemes": ["http"],
+  "paths": {
+    "/practice/request_new": {
+      "post": {
+        "tags": [
+          "setup"
+        ],
+        "summary": "Request new practice account creation",
+        "description": "",
+        "operationId": "requestNewPracticeAccount",
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "mobile_number",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "user_name",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "password",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "password_confirm",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "speciality",
+            "in": "formData",
+            "description": "",
+            "required1": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "Error1": { "description": "Name can't be blank" },
+          "Error2": { "description": "Mobile Number can't be blank" },
+          "Error3": { "description": "Email can't be blank" },
+          "Error4": { "description": "User Name can't be blank" },
+          "Error5": { "description": "Password can't be blank" },
+          "Error6": { "description": "Confirm Password can't be blank" },
+          "Error7": { "description": "Speciality can't be blank" }
+        }
+      }
+    },
+    "/practice/activate": {
+      "post": {
+        "tags": [
+          "setup"
+        ],
+        "summary": "Activate practice account",
+        "description": "",
+        "operationId": "activatePracticeAccount",
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "formData",
+            "description": "Id of practice to be activated",
+            "required1": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "Error1": {
+            "description": "Practice Id can't be blank"
+          },
+          "Error2": {
+            "description": "Practice doesn't exists"
+          },
+          "Error3": {
+            "description": "Practice is already active"
+          }
+        }
+      },
+      "/practice/clinic/save": {
+        "post": {
+          "tags": [
+            "practice"
+          ],
+          "summary": "Activate practice account",
+          "description": "",
+          "operationId": "activatePracticeAccount",
+          "consumes": [
+            "application/x-www-form-urlencoded"
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "parameters": [
+            {
+              "name": "doctor_id",
+              "in": "formData",
+              "description": "Id of a doctor",
+              "required1": true,
+              "type": "string"
+            },
+            {
+              "name": "clinic_id",
+              "in": "formData",
+              "description": "Only applicable in case of edit record or relations",
+              "required1": true,
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "in": "formData",
+              "description": "Name of Clinic",
+              "required1": true,
+              "type": "string"
+            },
+            {
+              "name": "address",
+              "in": "formData",
+              "description": "Address of Clinic",
+              "required1": true,
+              "type": "string"
+            },
+            {
+              "name": "timings",
+              "in": "formData",
+              "description": "JSON Array for Timings (start_time,end_time,array of days)",
+              "required1": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful operation",
+              "schema": {
+                "type": "string"
+              }
+            },
+            "Error1": {
+              "description": "Practice Id can't be blank"
+            },
+            "Error2": {
+              "description": "Practice doesn't exists"
+            },
+            "Error3": {
+              "description": "Practice is already active"
+            }
+          }
+        }
+      }
+    },
+    "/practice/appointments/retrieve": {
+      "get": {
+        "tags": ["appointments"],
+        "summary": "Retrieves data for account from specified date to another date",
+        "description": "",
+        "operationId": "practiceRetreiveAppointments",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "query",
+            "description": "",
+            "required1": true,
+            "type": "integer"
+          },
+          {
+            "name": "from_date",
+            "in": "query",
+            "description": "Filter from date (dd/mm/yyyy)",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "to_date",
+            "in": "query",
+            "description": "Filter to date (dd/mm/yyyy)",
+            "required1": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {"type": "string"}
+          },
+          "Success": {"description": "Appointments JSON with patient details embedded and schedule information"},
+          "AuthError": {"description": "Invalid Request"}
+        }
+      }
+    },
+    "/practice/appointments/by_months": {
+      "get": {
+        "tags": ["appointments"],
+        "summary": "Retrieves data for account from specified date to another date",
+        "description": "",
+        "operationId": "practiceRetreiveAppointments",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "query",
+            "description": "",
+            "required1": true,
+            "type": "integer"
+          },
+          {
+            "name": "from_month",
+            "in": "query",
+            "description": "Filter from month (mmyyyy)",
+            "required1": true,
+            "type": "string"
+          },
+          {
+            "name": "to_month",
+            "in": "query",
+            "description": "Filter to month (mmyyyy)",
+            "required1": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {"type": "string"}
+          },
+          "Success": {"description": "Summary of appointments for selected months with days and slot info"},
+          "AuthError": {"description": "Invalid Request"}
+        }
+      }
+    },
+    "securityDefinitions": {
+      "petstore_auth": {
+        "type": "oauth2",
+        "authorizationUrl": "http://petstore.swagger.io/api/oauth/dialog",
+        "flow": "implicit",
+        "scopes": {
+          "write:pets": "modify pets in your account",
+          "read:pets": "read your pets"
+        }
+      },
+      "api_key": {
+        "type": "apiKey",
+        "name": "api_key",
+        "in": "header"
+      }
+    },
+    "definitions": {
+      "User": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "username": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "userStatus": {
+            "type": "integer",
+            "format": "int32",
+            "description": "User Status"
+          }
+        },
+        "xml": {
+          "name": "User"
+        }
+      },
+      "Tag": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "Tag"
+        }
+      },
+      "ApiResponse": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "##default"
+        }
+      }
+    }
+  }
+}
+

@@ -1,0 +1,212 @@
+<div class="modal inmodal" id="studentForm" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content animated fadeIn">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span><span class="sr-only">Close</span>
+        </button>
+        <h4 class="modal-title ng-scope">Add student</h4>
+      </div>
+
+      <form role="form" onsubmit="saveStudent(); return false;">
+        <div class="modal-body">
+          <div id="formErrorDiv" style="display: none"></div>
+
+          <input type="hidden" id="student_id" name="student_id">
+          <div class="requiredMsg">All fields with <span>*</span> mark are required</div>
+
+          <div class="row">
+            <div class="col-xs-6 form-group">
+              <label for="name">Name <span>*</span></label>
+              <input class="form-control" type="text" name="name" id="name">
+            </div>
+
+
+            <div class="col-xs-6 form-group">
+              <label for="classroom_type">Classroom</label>
+              <select class="form-control" id="classroom_type" name="classroom_type">
+                <option value="">Select Classroom</option>
+                <% @classroomType.each do |value| %>
+                    <option value="<%= value[0] %>"><%= value[1] %></option>
+                <% end %>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-xs-6 form-group">
+              <label for="username">Birth Date <span>*</span></label>
+              <div class="input-group birth_date">
+                <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" name="dob" id="dob">
+              </div>
+            </div>
+
+            <div class="col-xs-6 form-group">
+              <label for="pick_up_time">Pick up Time</label>
+              <div class="input-group clockpicker" data-autoclose="true">
+                <input type="text" class="form-control" name="pick-up-time" id="pick_up_time">
+                <span class="input-group-addon">
+                    <span class="fa fa-clock-o"></span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="row" id="passwordFieldWrap">
+            <div class="col-xs-6 form-group">
+              <label for="primary_contact_number">Primary Contact Number <span>*</span></label>
+              <input class="form-control" type="text" name="primary_contact_number" id="primary_contact_number">
+            </div>
+
+            <div class="col-xs-6 form-group">
+              <label for="preferred_contact_number">Preferred Contact Number <span>*</span></label>
+              <input class="form-control" type="text" name="preferred_contact_number" id="preferred_contact_number">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-xs-6 form-group">
+              <label for="food_preference">Food Preference</label>
+              <input class="form-control" type="text" name="food_preference" id="food_preference">
+            </div>
+
+            <div class="col-xs-6 form-group">
+              <label for="ethnicity">Ethnicity</label></label>
+              <input class="form-control" type="text" name="ethnicity" id="ethnicity">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-xs-6 form-group">
+              <label for="address">Allergies</label>
+              <input class="form-control" type="text" name="allergies" id="allergies">
+            </div>
+
+            <div class="col-xs-6 form-group">
+              <label for="medical_conditions">Medical Conditions</label>
+              <input class="form-control" type="text" name="medical_conditions" id="medical_conditions">
+            </div>
+          </div>
+
+          <div class="row">
+            <% if @user_role == USER_ROLE_ADMIN %>
+                <div class="col-xs-6 form-group">
+                  <label for="day_care_center">Day Care Branch  <span>*</span></label>
+                  <select class="form-control" name="day_care_center" id="day_care_center" >
+                    <option value="">Select Day Care Branch</option>
+                    <% @dayCareCenters.each do |d| %>
+                        <option value="<%= d.id %>"><%= d.name %></option>
+                    <% end %>
+                  </select>
+                </div>
+            <% else %>
+                <input type="hidden" name="day_care_center" id="day_care_center" value="<%= @day_care_center_id %>">
+            <% end  %>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="text-center">
+            <div class="btnLoaderWrap" id="studentFormSubmitBtn">
+              <button type="submit" class="btn btn-primary submitButton">Add Student</button>
+              <div class="btnLoader">
+                <div class="sk-spinner sk-spinner-three-bounce">
+                  <div class="sk-bounce1"></div>
+                  <div class="sk-bounce2"></div>
+                  <div class="sk-bounce3"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal inmodal" id="uploadStudentImageForm" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content animated fadeIn">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span><span class="sr-only">Close</span>
+        </button>
+        <h4 class="modal-title ng-scope">Upload</h4>
+      </div>
+
+      <%= form_for @student, url: '/students/upload_image', html: { multipart: true } do |form| %>
+
+            <div class="modal-body">
+              <% if flash[:error].present? %>
+                <div id="uploadStudentImageFormErrorDiv" class="alert alert-danger"><%= flash[:error] %></div>
+            <% end %>
+
+          <input type="hidden" id="image_student_id" name="image_student_id">
+          <div class="row">
+            <div class="col-xs-6 form-group">
+              <label for="name">Image</label>
+              <input type="file" name="image" id="image">
+            </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <div class="text-center">
+            <button type="submit" name="submit" class="btn btn-primary">Upload Image</button>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="modal inmodal" id="assignedParentForm" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content animated fadeIn">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span><span class="sr-only">Close</span>
+        </button>
+        <h4 class="modal-title ng-scope">Assign Parents</h4>
+      </div>
+
+      <form role="form" onsubmit="saveRelatedParents(); return false;">
+        <div class="modal-body">
+          <div id="parentFormErrorDiv" style="display: none"></div>
+
+          <div id="related_parents">
+            <div class="row relatedParents">
+              <div class="col-xs-6 form-group">
+                <label for="student">Child</label>
+                <select class="form-control">
+                  <option value="">Select parent</option>
+                  <% @parents.each do |d| %>
+                      <option value="<%= d.id %>"><%= d.name %></option>
+                  <% end %>
+                </select>
+              </div>
+
+              <div class="col-xs-5 form-group rPos">
+                <label for="username">Relation</label>
+                <input class="form-control" type="text">
+                <a href="javascript:void(0)" class="removeRow" onclick="removeStudentRow(this)"><i class="fa fa-close"></i></a>
+              </div>
+            </div>
+          </div>
+          <a href="javascript:void(0)" onclick="addParentRow()">Add New</a>
+        </div>
+
+        <div class="modal-footer">
+          <div class="text-center">
+            <div class="btnLoaderWrap" id="parentFormSubmitBtn">
+              <button type="submit" class="btn btn-primary submitButton">Assign Children</button>
+              <div class="btnLoader">
+                <div class="sk-spinner sk-spinner-three-bounce">
+                  <div class="sk-bounce1"></div>
+                  <div class="sk-bounce2"></div>
+                  <div class="sk-bounce3"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

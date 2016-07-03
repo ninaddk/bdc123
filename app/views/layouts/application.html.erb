@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bloom || Day Care</title>
+  <link href="/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/font-awesome/css/font-awesome.css" rel="stylesheet">
+  <link href="/css/plugins/toastr/toastr.min.css" rel="stylesheet">
+  <link href="/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
+  <link href="/css/plugins/clockpicker/clockpicker.css" rel="stylesheet">
+  <link href="/css/animate.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <link href="/css/style-custom.css" rel="stylesheet">
+  <style>
+      .inmodal .modal-header {
+          padding: 15px 30px;
+          text-align: left;
+      }
+      .modal-header .close {
+          margin: -1px -1px 0 0;
+          font-size: 38px;
+      }
+      .datepicker.dropdown-menu,
+      .clockpicker-popover{ z-index: 9999 !important; }
+  </style>
+
+
+  <!-- Mainly scripts -->
+  <script src="/js/jquery-2.1.1.js"></script>
+</head>
+
+<body>
+
+<div id="wrapper">
+  <div class="row">
+    <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+      <ul class="nav navbar-top-links navbar-right">
+        <li>
+          <div class="dropdown profile-element">
+            <a data-toggle="dropdown" class="dropdown-toggle" href="#"><%= @user_name %> <b class="caret"></b></a>
+            <ul class="dropdown-menu animated fadeInRight m-t-xs">
+              <% if @user_role != USER_ROLE_SUPER_ADMIN %>
+                  <li><a href="javascript:void(0)" onclick="changePassword(<%=@user_id%>)">Change Password</a></li>
+              <% end %>
+              <li><a href="<%= @user_role == USER_ROLE_SUPER_ADMIN ? '/superadmin/logout':'/admin/logout' %>">Log Out</a></li>
+            </ul>
+          </div>
+        </li>
+        <li style="width: 1px;">
+          <a href="javascript:void(0)">&nbsp;</a>
+        </li>
+      </ul>
+
+    </nav>
+  </div>
+
+
+  <nav class="navbar-default navbar-static-side" role="navigation" >
+    <div class="sidebar-collapse">
+      <ul class="nav metismenu" id="side-menu">
+        <li class="nav-header" style="padding: 15px 25px">
+          <img src="/img/logo.png" class="logo">
+          <div class="navHeadTxt clearfix">
+            <%=raw @day_care_name != ''? "<div class=\"daycareName\">#{@day_care_name}</div>":"" %>
+            <%=raw @day_care_center_name != ''? "<div class=\"daycareCenterName\"> #{@day_care_center_name}</div>":"" %>
+          </div>
+        </li>
+
+        <% if @user_role == USER_ROLE_SUPER_ADMIN %>
+            <li><a href="/users/index"><i class="fa fa-user"></i> <span class="nav-label">Admin</span></a></li>
+            <li><a href="/day_cares/index"><i class="fa fa-asterisk"></i> <span class="nav-label">Day Care</span></a></li>
+            <li><a href="/branch_admins/index"><i class="fa fa-user"></i> <span class="nav-label">Branch Admin</span></a></li>
+            <li><a href="/day_care_centers/index"><i class="fa fa-asterisk"></i><span class="nav-label">Day Care Branch</span></a></li>
+
+        <% elsif @user_role == USER_ROLE_ADMIN %>
+            <li><a href="/dashboard/admin"><i class="fa fa fa-th-large"></i> <span class="nav-label">Dashboard</span></a></li>
+            <li><a href="/branch_admins/index"><i class="fa fa-user"></i> <span class="nav-label">Branch Admin</span></a></li>
+            <li><a href="/day_care_centers/index"><i class="fa fa-asterisk"></i><span class="nav-label">Day Care Branch</span></a></li>
+            <li><a href="/teachers/index"><i class="fa fa-user"></i> <span class="nav-label">Teachers</span></a></li>
+            <li><a href="/students/index"><i class="fa fa-user"></i> <span class="nav-label">Children</span></a></li>
+            <li><a href="/parents/index" ><i class="fa fa-user"></i><span class="nav-label">Parents</span></a></li>
+            <li><a href="/notifications/index" ><i class="fa fa-envelope"></i><span class="nav-label">Notifications</span></a></li>
+            <li><a href="/activities/index" ><i class="fa fa-envelope"></i><span class="nav-label">Activities</span></a></li>
+
+      <% elsif @user_role == USER_ROLE_BRANCH_ADMIN %>
+            <li><a href="/dashboard/branch_admin"><i class="fa fa fa-th-large"></i> <span class="nav-label">Dashboard</span></a></li>
+            <li><a href="/teachers/index"><i class="fa fa-user"></i> <span class="nav-label">Teachers</span></a></li>
+            <li><a href="/students/index"><i class="fa fa-user"></i> <span class="nav-label">Children</span></a></li>
+            <li><a href="/parents/index" ><i class="fa fa-user"></i><span class="nav-label">Parents</span></a></li>
+            <li><a href="/notifications/index" ><i class="fa fa-envelope"></i><span class="nav-label">Notifications</span></a></li>
+            <li><a href="/activities/index" ><i class="fa fa-envelope"></i><span class="nav-label">Activities</span></a></li>
+        <% end %>
+      </ul>
+
+    </div>
+  </nav>
+
+  <div id="page-wrapper" class="gray-bg">
+
+
+    <div class="row border-bottom" style="display: none">
+      <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+        <div class="navbar-header" style="padding:9px 20px">
+          <div class="clearfix">
+            <%=raw @day_care_name != ''? "<div class=\"pull-left\" style=\"margin-right: 20px\"><b>Day Care</b> <br/> #{@day_care_name}</div>":"" %>
+            <%=raw @day_care_center_name != ''? "<div class=\"pull-left\"><b>Day Care Center</b> <br/> #{@day_care_center_name}</div>":"" %>
+          </div>
+        </div>
+
+        <ul class="nav navbar-top-links navbar-right">
+          <li><a style="font-size: 12px" href="javascript:void(0)" onclick="changePassword(<%=@user_id%>)">Change Password</a></li>
+          <li>
+            <% if @user_role == USER_ROLE_SUPER_ADMIN %>
+                <a href="/superadmin/logout">
+                  <i class="fa fa-sign-out"></i> Log out
+                </a>
+            <% else %>
+                <a href="/admin/logout">
+                  <i class="fa fa-sign-out"></i> Log out
+                </a>
+            <% end %>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <%= yield %>
+
+  </div>
+</div>
+
+<div class="modal inmodal" id="changePasswordForm" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content animated fadeIn">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span><span class="sr-only">Close</span>
+        </button>
+        <h4 class="modal-title ng-scope">Change Password</h4>
+      </div>
+
+        <div class="modal-body">
+          <div id="passwordFormErrorDiv" style="display: none"></div>
+
+          <input type="hidden" id="password_form_user_id" name="password_form_user_id">
+          <div class="requiredMsg">All fields with <span>*</span> mark are required</div>
+
+          <div class="row">
+            <div class="col-xs-6 form-group">
+              <label for="old_password">Old Password <span>*</span></label>
+              <input class="form-control" type="password" name="old_password" id="old_password">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-xs-6 form-group">
+              <label for="new_password">New Password <span>*</span></label>
+              <input class="form-control" type="password" name="new_password" id="new_password">
+            </div>
+
+            <div class="col-xs-6 form-group">
+              <label for="confirm_new_password">Confirm New Password <span>*</span></label>
+              <input class="form-control" type="password" name="confirm_new_password" id="confirm_new_password">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="text-center">
+            <button type="submit" name="submit" onclick="changeUserPassword(); return false;" class="btn btn-primary submitButton">Submit</button>
+          </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/plugins/metisMenu/jquery.metisMenu.js"></script>
+<script src="/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+<script src="/js/plugins/toastr/toastr.min.js"></script>
+<!-- Data picker -->
+<script src="/js/plugins/datapicker/bootstrap-datepicker.js"></script>
+<!-- Clock picker -->
+<script src="/js/plugins/clockpicker/clockpicker.js"></script>
+
+<!-- Custom and plugin javascript -->
+<script src="/js/inspinia.js"></script>
+<script src="/js/plugins/pace/pace.min.js"></script>
+<script src="/js/common.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('.input-group.date').datepicker({
+            autoclose: true,
+            format: "dd/mm/yyyy"
+        });
+
+        $('.clockpicker').clockpicker();
+
+        $('.navbar-static-side').css('height', $('body').height());
+    });
+
+function changePassword(id){
+    $("#password_form_user_id").val(id);
+    $("#old_password").val('');
+    $("#new_password").val('');
+    $("#confirm_new_password").val('');
+    $("#changePasswordForm").modal('show');
+}
+
+function changeUserPassword(){
+    var old_password = jQuery("#old_password").val();
+    var new_password = jQuery("#new_password").val();
+    var confirm_new_password = jQuery("#confirm_new_password").val();
+
+    $.ajax({
+        url: '/users/change_password',
+        type: 'POST',
+        data: {
+            authenticity_token: '<%= form_authenticity_token %>',
+            id: $('#password_form_user_id').val() ? $('#password_form_user_id').val() : 0,
+            old_password: old_password,
+            new_password: new_password,
+            confirm_new_password: confirm_new_password
+        },
+        success: function (data) {
+            if(isErrorResponce(data)){
+                showFormError('passwordFormErrorDiv', getErrorMessage(data));
+                return;
+            }
+
+            $('#changePasswordForm').modal('hide');
+            showTosterMsg('success', 'Password changed successfully');
+            //location.reload();
+        }
+    });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,195 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+  <div class="col-xs-10">
+    <h2>Branch Admin</h2>
+    <ol class="breadcrumb">
+      <li>
+        <a href="index.html">Home</a>
+      </li>
+      <li class="active">
+        <strong>Branch Admins</strong>
+      </li>
+    </ol>
+  </div>
+
+  <div class="col-xs-2">
+    <a href="javascript:void(0)" onclick="showAddBranchAdminForm()" style="    float: right;
+            font-size: 38px;
+            margin: 16px 10px 0 0;
+            color: #1ab394;"><i class="fa fa-plus-circle"></i></a>
+  </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+
+  <div class="ibox float-e-margins">
+    <div class="ibox-content">
+      <% if !flash[:notice].blank? %>
+          <div class="alert alert-success"><%= flash[:notice] %></div>
+      <% end %>
+
+
+      <table class="table table-striped">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Username</th>
+          <th>Day Care Branch</th>
+          <th class="text-center">Actions</th>
+        </tr>
+        </thead>
+        <tbody id="branchAdminDataDiv">
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<%= render partial: 'form' %>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        populateHtml();
+    });
+
+    var branchAdmins = new Array();
+    <% @branchAdmins.each do |branch_admin| %>
+        branchAdmins[<%=branch_admin.id%>] = {
+            id: "<%=raw branch_admin.id %>",
+            name: "<%=raw json_string branch_admin.name %>",
+            email: "<%=raw json_string branch_admin.email %>",
+            username: "<%=raw json_string branch_admin.username %>",
+            day_care_center_id: "<%=raw branch_admin.user_role.day_care_center_id %>",
+            day_care_center_name: "<%=raw json_string branch_admin.user_role.day_care_center.name %>"
+        };
+    <% end %>
+
+    function populateHtml(){
+        var str = ""
+        for(i in branchAdmins){
+            var branch_admin = branchAdmins[i];
+            str += '<tr class="tblrow-'+ branch_admin.id +'">'+
+                    '<td id="branch_admin-'+ branch_admin.id +'">'+ branch_admin.name +'</td>'+
+                    '<td>'+ branch_admin.email +'</td>'+
+                    '<td>'+ branch_admin.username +'</td>'+
+                    '<td>'+ branch_admin.day_care_center_name +'</td>'+
+                    '<td class="text-center">'+
+                    '<a href="javascript:void(0)" onclick="showEditBranchAdminForm('+ i +')"><i class="fa fa-pencil-square-o text-navy"></i></a> &nbsp; '+
+                    "<a href=\"javascript:void(0)\" onclick=\"deleteBranchAdminConfirm("+ branch_admin.id +")\"><i class=\"fa fa-trash-o text-navy\"></i></a>"+
+                    '</td>'+
+                    '</tr>';
+        }
+        $("#branchAdminDataDiv").html(str);
+    };
+
+    function showAddBranchAdminForm(){
+        resetBranchAdminForm();
+
+        $("#username").prop("readonly", false);
+        $("#passwordFieldWrap").css("display","block");
+        $("#branchAdminForm .submitButton, #branchAdminForm .modal-title").text("Add Branch Admin");
+        $('#branchAdminForm').modal('show');
+    };
+
+    function showEditBranchAdminForm(id){
+        resetBranchAdminForm();
+
+        var branch_admin = branchAdmins[id];
+        $("#branch_admin_id").val(branch_admin.id);
+        $("#name").val(branch_admin.name);
+        $("#email").val(branch_admin.email);
+        $("#username").val(branch_admin.username).prop("readonly", true);
+        $("#day_care_center").val(branch_admin.day_care_center_id);
+        $("#passwordFieldWrap").css("display","none");
+
+        $("#branchAdminForm .submitButton, #branchAdminForm .modal-title").text("Update Branch Admin");
+        $('#branchAdminForm').modal('show');
+    };
+
+    var day_care_center_name = "";
+    function saveBranchAdmin() {
+        $("#branchAdminFormSubmitBtn").addClass("btnLoaderWrapActive");
+        var name = jQuery("#name").val();
+        var email = jQuery("#email").val();
+        var username = jQuery("#username").val();
+        var password = jQuery("#password").val();
+        var confirm_password = jQuery("#confirm_password").val();
+        var day_care_center = jQuery("#day_care_center").val();
+        day_care_center_name = jQuery("#day_care_center option:selected").text();
+
+        $.ajax({
+            url: '/branch_admins/save',
+            type: 'POST',
+            data: {
+                authenticity_token: '<%= form_authenticity_token %>',
+                id: $('#branch_admin_id').val() ? $('#branch_admin_id').val() : 0,
+                name: name,
+                email: email,
+                username: username,
+                password: password,
+                confirm_password: confirm_password,
+                day_care_center_id: day_care_center
+            },
+            success: function (data) {
+                $("#branchAdminFormSubmitBtn").removeClass("btnLoaderWrapActive");
+                if(isErrorResponce(data)){
+                    showFormError('formErrorDiv', getErrorMessage(data));
+                    return;
+                }
+
+                $('#branchAdminForm').modal('hide');
+
+                //updateData(data.contents);
+                showTosterMsg('success', 'Data saved successfully');
+                location.reload();
+            }
+        });
+    };
+
+    function updateData(branch_admin){
+        if(branchAdmins[branch_admin.id] == null ){
+            var newObj = { id: branch_admin.id, name: branch_admin.name, username: branch_admin.username, day_care_center_id: branch_admin.user_role.day_care_center_id, day_care_center_name: day_care_center_name};
+            branchAdmins.push(newObj);
+
+        }else {
+            branchAdmins[branch_admin.id].name = branch_admin.name;
+            branchAdmins[branch_admin.id].day_care_id = branch_admin.user_role.day_care_center_id;
+            branchAdmins[branch_admin.id].day_care_center_name = day_care_center_name;
+        }
+
+        populateHtml();
+        day_care_center_name = '';
+    };
+
+    function deleteBranchAdminConfirm(id) {
+        var r = confirm("Do you want to delete " + $("#branch_admin-"+id).text());
+        if (r == true) {
+            $.ajax({
+                url: '/branch_admins/delete/' + id,
+                type: 'GET',
+                success: function (data) {
+                    if(isErrorResponce(data)){
+                        showFormError('formErrorDiv', getErrorMessage(data));
+                        return;
+                    }
+
+                    //$(".tblrow-" + id).remove();
+                    showTosterMsg('success', name+' removed successfully');
+                    location.reload();
+                }
+            });
+        }
+    };
+
+    function resetBranchAdminForm(){
+        $("#branch_admin_id").val('');
+        $("#name").val('');
+        $("#email").val('');
+        $("#username").val('');
+        $("#password").val('');
+        $("#confirm_password").val('');
+        $("#day_care_center").val('');
+    };
+</script>
